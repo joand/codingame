@@ -19,17 +19,27 @@ The maximal loss **p**, expressed negatively if there is a loss, otherwise 0.
 0 < **v** < 2^31
 
 ### Examples
-Input|Output
+###### Input
 6
 
-3 2 4 2 1 5 |-3
+3 2 4 2 1 5
 
-Input|Output
+###### Output
+-3
+
+
+###### Input
 6
 
-5 3 4 2 3 1|-4
+5 3 4 2 3 1
 
-Input|Output
+###### Output
+-4
+
+
+###### Input
 5
 
-1 2 4 4 5|0
+1 2 4 4 5
+###### Output
+0
