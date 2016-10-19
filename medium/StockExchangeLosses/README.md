@@ -26,7 +26,7 @@ The maximal loss **p**, expressed negatively if there is a loss, otherwise 0.
 
 ###### Output
 -3
-
+---
 
 ###### Input
 6
@@ -35,7 +35,7 @@ The maximal loss **p**, expressed negatively if there is a loss, otherwise 0.
 
 ###### Output
 -4
-
+---
 
 ###### Input
 5
