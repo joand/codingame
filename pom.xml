@@ -8,6 +8,7 @@
     <name>CodinGame</name>
     <modules>
         <module>easy/horseRacingDual</module>
+        <module>easy/ascii</module>
         <module>medium/StockExchangeLosses</module>
     </modules>
     <build>
