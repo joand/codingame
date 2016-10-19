@@ -15,23 +15,21 @@ The maximal loss **p**, expressed negatively if there is a loss, otherwise 0.
 
 ### Constraints
 0 < **n** < 100000
+
 0 < **v** < 2^31
 
 ### Examples
-Input
+Input|Output
 6
-3 2 4 2 1 5
-Output
--3
 
-Input
+3 2 4 2 1 5 |-3
+
+Input|Output
 6
-5 3 4 2 3 1
-Output
--4
 
-Input
+5 3 4 2 3 1|-4
+
+Input|Output
 5
-1 2 4 4 5
-Output
-0
+
+1 2 4 4 5|0
