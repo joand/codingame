@@ -10,6 +10,7 @@
         <module>easy/horseRacingDual</module>
         <module>easy/ascii</module>
         <module>medium/StockExchangeLosses</module>
+        <module>medium/PhoneNumbers</module>
     </modules>
     <build>
         <plugins>
