@@ -11,6 +11,7 @@
         <module>easy/ascii</module>
         <module>medium/StockExchangeLosses</module>
         <module>medium/PhoneNumbers</module>
+        <module>simpleTree</module>
     </modules>
     <build>
         <plugins>
