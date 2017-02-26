@@ -1,6 +1,8 @@
 package fr.joand;
 
 import fr.joand.model.Edge;
+import fr.joand.model.Factory;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -10,22 +12,29 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class AppTest {
+    private static List<Factory> factories;
+    private static List<Edge> edges;
 
-    @Test
-    public void getEdge(){
-        Edge a = new Edge(1, 2, 5);
-        Edge a_clone = new Edge(2, 1);
-
-        Edge c = new Edge(2, 3, 6);
-
-        List<Edge> edges = new ArrayList<>();
-        edges.add(a);
-        edges.add(c);
-
-        Edge edge = App.getEdge(edges, a_clone);
-        assertTrue(edge.equals(a));
-        assertFalse(edge.equals(c));
+    @BeforeClass
+    public static void init() {
+        factories = new ArrayList<>();
+        edges = new ArrayList<>();
     }
 
+    @Test
+    public void calculateOportunityScore() {
+        App.calculateOpportunityScore(factories, edges);
+    }
+
+
+    @Test
+    public void calculateDangerScore() {
+        App.calculateDangerScore(factories, edges);
+    }
+
+    @Test
+    public void takeADecision(){
+        String action = App.takeADecision(factories, edges);
+    }
 
 }

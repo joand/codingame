@@ -40,4 +40,15 @@ public class Troop {
     public int getNbOfCyborgs() {
         return nbOfCyborgs;
     }
+
+    @Override
+    public String toString() {
+        return "Troop{" +
+                "id=" + id +
+                ", owner=" + owner +
+                ", nbOfCyborgs=" + nbOfCyborgs +
+                ", destinationFactoryId=" + destinationFactoryId +
+                ", remainingDistance=" + remainingDistance +
+                '}';
+    }
 }

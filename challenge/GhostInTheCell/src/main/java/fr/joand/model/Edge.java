@@ -9,24 +9,24 @@ import java.util.Objects;
  */
 public class Edge {
 
-    private final int factory_A;
-    private final int factory_B;
+    private final int factoryId_A;
+    private final int factoryId_B;
     private final int distance;
 
     private List<Troop> troops = new ArrayList<>();
 
-    public Edge(int factory_A, int factory_B, int distance) {
-        this.factory_A = factory_A;
-        this.factory_B = factory_B;
+    public Edge(int factoryId_A, int factoryId_B, int distance) {
+        this.factoryId_A = factoryId_A;
+        this.factoryId_B = factoryId_B;
         this.distance = distance;
     }
 
     /**
      * creates partial Edge with empty troops and invalid distance(-1)
      * */
-    public Edge(int factory_A, int factory_B) {
-        this.factory_A = factory_A;
-        this.factory_B = factory_B;
+    public Edge(int factoryId_A, int factoryId_B) {
+        this.factoryId_A = factoryId_A;
+        this.factoryId_B = factoryId_B;
         this.distance = -1;
     }
 
@@ -41,12 +41,12 @@ public class Edge {
         return new ArrayList<>(troops);
     }
 
-    public int getFactory_A() {
-        return factory_A;
+    public int getFactoryId_A() {
+        return factoryId_A;
     }
 
-    public int getFactory_B() {
-        return factory_B;
+    public int getFactoryId_B() {
+        return factoryId_B;
     }
 
     public int getDistance() {
@@ -62,14 +62,23 @@ public class Edge {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Edge edge = (Edge) o;
-        return (factory_A == edge.factory_A &&
-                factory_B == edge.factory_B) ||
-                (factory_A == edge.factory_B &&
-                        factory_B == edge.factory_A);
+        return (factoryId_A == edge.factoryId_A &&
+                factoryId_B == edge.factoryId_B) ||
+                (factoryId_A == edge.factoryId_B &&
+                        factoryId_B == edge.factoryId_A);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(factory_A, factory_B);
+        return Objects.hash(factoryId_A, factoryId_B);
+    }
+
+    @Override
+    public String toString() {
+        return "Edge{" +
+                "factoryId_A=" + factoryId_A +
+                ", factoryId_B=" + factoryId_B +
+                ", distance=" + distance +
+                '}';
     }
 }

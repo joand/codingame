@@ -3,6 +3,7 @@ package fr.joand.model;
 
 import java.util.List;
 
+// todo : useful ?
 public class Graph {
     private final List<Factory> factories;
     private final List<Edge> edges;
