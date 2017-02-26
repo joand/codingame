@@ -61,8 +61,15 @@ public class App {
                     case "FACTORY":
                         int nbOfCyborgsInFactory = arg2;
                         int production = arg3;
-                        Factory factory = new Factory(entityId, owner, nbOfCyborgsInFactory, production);
-                        factories.put(entityId, factory);
+                        if(factories.containsKey(entityId)){
+                            Factory factory = factories.get(entityId);
+                            factory.setOwner(owner);
+                            factory.setStockOfCyborgs(nbOfCyborgsInFactory);
+                            factory.setProduction(production);
+                        } else {
+                            Factory factory = new Factory(entityId, owner, nbOfCyborgsInFactory, production);
+                            factories.put(entityId, factory);
+                        }
                         break;
                     case "TROOP":
                         int factoryIdSource = arg2;

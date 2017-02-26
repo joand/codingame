@@ -4,7 +4,7 @@ package fr.joand.model;
 public enum Owner {
     ally(1), enemy(-1), neutral(0);
 
-    int id;
+    final int id;
 
     Owner(int id) {
         this.id = id;

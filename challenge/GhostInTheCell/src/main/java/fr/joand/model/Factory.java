@@ -4,6 +4,7 @@ import java.util.Objects;
 
 public class Factory {
     final private int id;
+
     private Owner owner;
     private int stockOfCyborgs;
     /**

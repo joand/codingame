@@ -21,6 +21,9 @@ public class Edge {
         this.distance = distance;
     }
 
+    /**
+     * creates partial Edge with empty troops and invalid distance(-1)
+     * */
     public Edge(int factory_A, int factory_B) {
         this.factory_A = factory_A;
         this.factory_B = factory_B;
