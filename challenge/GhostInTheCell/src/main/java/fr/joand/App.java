@@ -1,5 +1,6 @@
 package fr.joand;
 
+import fr.joand.exception.ElementNotFoundException;
 import fr.joand.model.Edge;
 import fr.joand.model.Factory;
 import fr.joand.model.Owner;
@@ -17,25 +18,29 @@ import java.util.*;
  */
 public class App {
 
+    /**
+     * @return the full Edge or null if not found
+     */
+    static Edge getEdge(List<Edge> edges, Edge partialEdgeToFind) {
+        return edges.stream()
+                .filter(edge -> edge.equals(partialEdgeToFind))
+                .findAny().orElseThrow(ElementNotFoundException::new);
+    }
+
     public static void main(String args[]) {
         Scanner in = new Scanner(System.in);
-        int factoryCount = in.nextInt(); // the number of factories
 
-        Map<Integer, Factory> factories = new HashMap<Integer, Factory>();
-        List<Edge> edges = new ArrayList<Edge>();
+        int factoryCount = in.nextInt(); // the number of factories
+        Map<Integer, Factory> factories = new HashMap<>(factoryCount);
 
         int linkCount = in.nextInt(); // the number of links between factories
+        List<Edge> edges = new ArrayList<>(linkCount);
         for (int i = 0; i < linkCount; i++) {
             int factory1 = in.nextInt();
-            Factory factory_1 = new Factory(factory1);
-            factories.put(factory1, factory_1);
-
             int factory2 = in.nextInt();
-            Factory factory_2 = new Factory(factory2);
-            factories.put(factory2, factory_2);
-
             int distance = in.nextInt();
-            Edge edge = new Edge(factory_1, factory_2, distance);
+
+            Edge edge = new Edge(factory1, factory2, distance);
             edges.add(edge);
         }
 
@@ -57,17 +62,19 @@ public class App {
                         int nbOfCyborgsInFactory = arg2;
                         int production = arg3;
                         Factory factory = new Factory(entityId, owner, nbOfCyborgsInFactory, production);
-                        // todo store factory somewhere ...
+                        factories.put(entityId, factory);
                         break;
                     case "TROOP":
                         int factoryIdSource = arg2;
                         int factoryIdDestination = arg3;
-                        Edge edge = getEdge(factoryIdSource, factoryIdDestination);
+                        Edge edgeTmp = new Edge(factoryIdSource, factoryIdDestination);
+                        Edge edge = getEdge(edges, edgeTmp);
 
                         int nbOfCyborgsInTroop = arg4;
                         int remainingDistance = arg5;
-                        Troop troop = new Troop(entityId, owner, edge, nbOfCyborgsInTroop, remainingDistance);
-                        // todo store troop somewhere ...
+
+                        Troop troop = new Troop(entityId, owner, nbOfCyborgsInTroop, remainingDistance, factoryIdDestination);
+                        edge.addTroop(troop);
                         break;
                     default:
                         break;

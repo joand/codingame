@@ -1,8 +1,6 @@
 package fr.joand.model;
 
-/**
- * Created by user on 25/02/2017.
- */
+
 public enum Owner {
     ally(1), enemy(-1), neutral(0);
 

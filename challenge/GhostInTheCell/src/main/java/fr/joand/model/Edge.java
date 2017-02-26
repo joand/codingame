@@ -1,46 +1,72 @@
 package fr.joand.model;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
-public class Edge  {
-    /**
-     * useless id
-     * */
-    private String id = "-1";
-    private final Factory source;
-    private final Factory destination;
+/**
+ * Edges are given with an orientation (from-to) BUT troops can move both ways
+ */
+public class Edge {
+
+    private final int factory_A;
+    private final int factory_B;
     private final int distance;
 
-    public Edge(Factory source, Factory destination, int distance) {
-        this.source = source;
-        this.destination = destination;
+    private List<Troop> troops = new ArrayList<>();
+
+    public Edge(int factory_A, int factory_B, int distance) {
+        this.factory_A = factory_A;
+        this.factory_B = factory_B;
         this.distance = distance;
     }
 
-    public Edge(String id, Factory source, Factory destination, int distance) {
-        this.id = id;
-        this.source = source;
-        this.destination = destination;
-        this.distance = distance;
+    public Edge(int factory_A, int factory_B) {
+        this.factory_A = factory_A;
+        this.factory_B = factory_B;
+        this.distance = -1;
     }
 
-    public String getId() {
-        return id;
-    }
-    public Factory getDestination() {
-        return destination;
+    public void addTroop(Troop troop) {
+        troops.add(troop);
     }
 
-    public Factory getSource() {
-        return source;
+    /**
+     * @return a copy of troops
+     */
+    public List<Troop> getTroops() {
+        return new ArrayList<>(troops);
     }
+
+    public int getFactory_A() {
+        return factory_A;
+    }
+
+    public int getFactory_B() {
+        return factory_B;
+    }
+
     public int getDistance() {
         return distance;
     }
 
+    /**
+     * Edges are given with an orientation (from-to) BUT troops can move both ways
+     * so this method tests only the facories' id in both ways
+     * */
     @Override
-    public String toString() {
-        return source + " " + destination;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Edge edge = (Edge) o;
+        return (factory_A == edge.factory_A &&
+                factory_B == edge.factory_B) ||
+                (factory_A == edge.factory_B &&
+                        factory_B == edge.factory_A);
     }
 
-
+    @Override
+    public int hashCode() {
+        return Objects.hash(factory_A, factory_B);
+    }
 }
