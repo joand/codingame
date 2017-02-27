@@ -34,6 +34,9 @@ public class Edge {
         troops.add(troop);
     }
 
+    public void clearTroops(){
+        troops.clear();
+    }
     /**
      * @return a copy of troops
      */

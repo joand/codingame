@@ -1,6 +1,5 @@
 package fr.joand.model;
 
-import java.util.List;
 import java.util.Objects;
 
 public class Factory {
@@ -12,36 +11,18 @@ public class Factory {
      * Each turn, every non-neutral factory produces between 0 and 3 cyborgs.
      * BUT once the factory is created, this number will not change !
      */
-    private int production;
+    private int production = 0;
     /**
      * used to calculate the opportunity score of this factory when this.owner != ally <br/>
-     * a high score means it will cost a lot to conquer it
+     * a high score means good opportunity
      */
     private int opportunityScore = 0;
 
     /**
-     * used to calculate the danger score of this factory when this.owner == ally  <br/>
+     * used to calculate the danger score of this factory <br/>
      * a high score means high danger. low score means safe. can be negative (low)
      */
     private int dangerScore = 0;
-
-    /**
-     * all edges which are directly connected to this factory
-     * todo : is it a good idea ?
-     */
-    private List<Edge> connectedEdges;
-    /**
-     * all factories which are directly connected to this factory
-     * todo : is it a good idea ? YES !
-     */
-    private List<Factory> neighbors;
-
-    public Factory(int id, Owner owner, int stockOfCyborgs, int production) {
-        this.id = id;
-        this.owner = owner;
-        this.stockOfCyborgs = stockOfCyborgs;
-        this.production = production;
-    }
 
     public int getProduction() {
         return production;
