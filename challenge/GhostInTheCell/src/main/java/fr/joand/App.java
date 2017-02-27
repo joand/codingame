@@ -195,25 +195,39 @@ public class App {
      * Any valid action, such as "WAIT" or "MOVE source destination cyborgs" <br/>
      * based on production & distance
      */
-    public static String takeADecision(List<Factory> factories, List<Edge> edges) {
-        String action = "WAIT";
-
+    public static void takeADecision(List<Factory> factories, List<Edge> edges) {
         // trier les factories pour avoir les > opportunity score en premier
-        List<Factory> sortedFactories = factories.stream().sorted((o1, o2) -> o2.getOpportunityScore() - o1.getOpportunityScore()).collect(Collectors.toList());
+        List<Factory> opportunitySorted = factories.stream().sorted((o1, o2) -> o2.getOpportunityScore() - o1.getOpportunityScore()).collect(Collectors.toList());
+        List<Factory> dangerSorted = factories.stream().sorted((o1, o2) -> o2.getDangerScore() - o1.getDangerScore()).collect(Collectors.toList());
 
         // filtrer par Owner
-        List<Factory> allies = sortedFactories.stream().filter(factory -> factory.getOwner() == Owner.ally).collect(Collectors.toList());
-        List<Factory> others = sortedFactories.stream().filter(factory -> factory.getOwner() != Owner.ally).collect(Collectors.toList());
+        List<Factory> allies = dangerSorted.stream().filter(factory -> factory.getOwner() == Owner.ally).collect(Collectors.toList());
+        List<Factory> others = opportunitySorted.stream().filter(factory -> factory.getOwner() != Owner.ally).collect(Collectors.toList());
 
         //if (opening(factories, allies)) {
         // conquérir le plus rapidement
-        Factory target = others.get(0);
-        // je prend celui qui a le plus de cyborgs...
-        Factory source = getAllyNeighbors(factories, edges, target).stream()
-                .sorted((o1, o2) -> o2.getStockOfCyborgs() - o1.getStockOfCyborgs())
-                .findFirst().get();
-        // todo attention au danger score sinon j'envoie toute l'armée...
-        action = move(source.getId(), target.getId(), 2);
+
+        StringBuffer action = new StringBuffer();
+        // offensive
+        int weaponSize = 2;
+        for (Factory target : others) {
+            // je prend celui qui a le plus de cyborgs...
+            Factory source = getAllyNeighbors(factories, edges, target).stream()
+                    .sorted((o1, o2) -> o2.getStockOfCyborgs() - o1.getStockOfCyborgs())
+                    .findFirst().get();
+            action.append(move(source.getId(), target.getId(), Math.round((float) source.getStockOfCyborgs() / (float) weaponSize)));
+        }
+
+        // defensive
+        int shieldSize = 2;
+        for (Factory target : allies) {
+            Factory source = getAllyNeighbors(factories, edges, target).stream()
+                    .sorted((o1, o2) -> o2.getStockOfCyborgs() - o1.getStockOfCyborgs())
+                    .findFirst().orElse(null);
+            if (target.getDangerScore() > 0 && source != null) {
+                action.append(move(source.getId(), target.getId(), Math.round((float) source.getStockOfCyborgs() / (float) shieldSize)));
+            }
+        }
         /*
         } else if (midGame()) {
             // construire, défendre et attaquer
@@ -221,8 +235,7 @@ public class App {
             // achever
         }
         //*/
-        System.out.println(action);
-        return action;
+        System.out.println(action.toString() + "MSG end turn");
     }
 
     private static boolean opening(List<Factory> factories, List<Factory> allies) {
@@ -244,6 +257,6 @@ public class App {
     }
 
     public static String move(int source, int destination, int cyborgs) {
-        return "MOVE " + source + " " + destination + " " + cyborgs;
+        return "MOVE " + source + " " + destination + " " + cyborgs + ";";
     }
 }
