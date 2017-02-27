@@ -139,7 +139,7 @@ public class App {
         for (Factory factory : notOwnedFactories) {
             int maxScore = 0;
             for (Factory neighbor : getAllyNeighbors(factories, edges, factory)) {
-                float score = (float) factory.getProduction() / (float) getEdge(edges, factory.getId(), neighbor.getId()).getDistance();
+                float score = (float) factory.getProduction() / (float) (getEdge(edges, factory.getId(), neighbor.getId()).getDistance() + factory.getStockOfCyborgs());
                 int intScore = Math.round(score * 10000);
                 maxScore = Math.max(maxScore, intScore);
             }
@@ -213,7 +213,7 @@ public class App {
                 .sorted((o1, o2) -> o2.getStockOfCyborgs() - o1.getStockOfCyborgs())
                 .findFirst().get();
         // todo attention au danger score sinon j'envoie toute l'armée...
-        action = move(source.getId(), target.getId(), target.getDangerScore() + 1);
+        action = move(source.getId(), target.getId(), 2);
         /*
         } else if (midGame()) {
             // construire, défendre et attaquer
