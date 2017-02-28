@@ -1,13 +1,6 @@
-package fr.joand;
-
-import fr.joand.exception.ElementNotFoundException;
-import fr.joand.model.Edge;
-import fr.joand.model.Factory;
-import fr.joand.model.Owner;
-import fr.joand.model.Troop;
-
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.Objects;
 
 /**
  * sources :
@@ -19,7 +12,7 @@ import java.util.stream.Collectors;
  * http://fr.wikihow.com/gagner-une-partie-de-Risk
  * StarCraft
  */
-public class App {
+class Player {
 
     /**
      * @return the full Edge
@@ -259,4 +252,255 @@ public class App {
     public static String move(int source, int destination, int cyborgs) {
         return "MOVE " + source + " " + destination + " " + cyborgs + ";";
     }
+}
+
+class Edge {
+
+    private final int factoryId_A;
+    private final int factoryId_B;
+    private final int distance;
+
+    private List<Troop> troops = new ArrayList<>();
+
+    public Edge(int factoryId_A, int factoryId_B, int distance) {
+        this.factoryId_A = factoryId_A;
+        this.factoryId_B = factoryId_B;
+        this.distance = distance;
+    }
+
+    /**
+     * creates partial Edge with empty troops and invalid distance(-1)
+     * */
+    public Edge(int factoryId_A, int factoryId_B) {
+        this.factoryId_A = factoryId_A;
+        this.factoryId_B = factoryId_B;
+        this.distance = -1;
+    }
+
+    public void addTroop(Troop troop) {
+        troops.add(troop);
+    }
+
+    public void clearTroops(){
+        troops.clear();
+    }
+    /**
+     * @return a copy of troops
+     */
+    public List<Troop> getTroops() {
+        return new ArrayList<>(troops);
+    }
+
+    public int getFactoryId_A() {
+        return factoryId_A;
+    }
+
+    public int getFactoryId_B() {
+        return factoryId_B;
+    }
+
+    public int getDistance() {
+        return distance;
+    }
+
+    /**
+     * Edges are given with an orientation (from-to) BUT troops can move both ways
+     * so this method tests only the facories' id in both ways
+     * */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Edge edge = (Edge) o;
+        return (factoryId_A == edge.factoryId_A &&
+                factoryId_B == edge.factoryId_B) ||
+                (factoryId_A == edge.factoryId_B &&
+                        factoryId_B == edge.factoryId_A);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(factoryId_A, factoryId_B);
+    }
+
+    @Override
+    public String toString() {
+        return "Edge{" +
+                "factoryId_A=" + factoryId_A +
+                ", factoryId_B=" + factoryId_B +
+                ", distance=" + distance +
+                '}';
+    }
+}
+
+class Factory {
+    final private int id;
+
+    private Owner owner;
+    private int stockOfCyborgs;
+    /**
+     * Each turn, every non-neutral factory produces between 0 and 3 cyborgs.
+     * BUT once the factory is created, this number will not change !
+     */
+    private int production = 0;
+    /**
+     * used to calculate the opportunity score of this factory when this.owner != ally <br/>
+     * a high score means good opportunity
+     */
+    private int opportunityScore = 0;
+
+    /**
+     * used to calculate the danger score of this factory <br/>
+     * a high score means high danger. low score means safe. can be negative (low)
+     */
+    private int dangerScore = 0;
+
+    public int getProduction() {
+        return production;
+    }
+
+    public void setProduction(int production) {
+        this.production = production;
+    }
+
+    public Factory(int id) {
+        this.id = id;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public int getStockOfCyborgs() {
+        return stockOfCyborgs;
+    }
+
+    public void setStockOfCyborgs(int stockOfCyborgs) {
+        this.stockOfCyborgs = stockOfCyborgs;
+    }
+
+    public Owner getOwner() {
+        return owner;
+    }
+
+    public void setOwner(Owner owner) {
+        this.owner = owner;
+    }
+
+    public int getOpportunityScore() {
+        return opportunityScore;
+    }
+
+    public void setOpportunityScore(int opportunityScore) {
+        this.opportunityScore = opportunityScore;
+    }
+
+    public int getDangerScore() {
+        return dangerScore;
+    }
+
+    public void setDangerScore(int dangerScore) {
+        this.dangerScore = dangerScore;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Factory factory = (Factory) o;
+        return id == factory.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return "Factory{" +
+                "id=" + id +
+                ", owner=" + owner +
+                ", stockOfCyborgs=" + stockOfCyborgs +
+                ", production=" + production +
+                '}';
+    }
+}
+
+class Troop {
+    final private int id;
+    final private Owner owner;
+    final private int nbOfCyborgs;
+    final private int destinationFactoryId;
+
+    private int remainingDistance;
+
+    public Troop(int id, Owner owner, int nbOfCyborgs, int remainingDistance, int destinationFactoryId) {
+        this.id = id;
+        this.owner = owner;
+        this.nbOfCyborgs = nbOfCyborgs;
+        this.remainingDistance = remainingDistance;
+        this.destinationFactoryId = destinationFactoryId;
+    }
+
+    public int getDestinationFactoryId() {
+        return destinationFactoryId;
+    }
+
+    public Owner getOwner() {
+        return owner;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public int getRemainingDistance() {
+        return remainingDistance;
+    }
+
+    public void setRemainingDistance(int remainingDistance) {
+        this.remainingDistance = remainingDistance;
+    }
+
+    public int getNbOfCyborgs() {
+        return nbOfCyborgs;
+    }
+
+    @Override
+    public String toString() {
+        return "Troop{" +
+                "id=" + id +
+                ", owner=" + owner +
+                ", nbOfCyborgs=" + nbOfCyborgs +
+                ", destinationFactoryId=" + destinationFactoryId +
+                ", remainingDistance=" + remainingDistance +
+                '}';
+    }
+}
+
+enum Owner {
+    ally(1), enemy(-1), neutral(0);
+
+    final int id;
+
+    Owner(int id) {
+        this.id = id;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public static Owner get(int id) {
+        for (Owner owner : values()) {
+            if (owner.getId() == id) {
+                return owner;
+            }
+        }
+        return null;
+    }
+}
+
+class ElementNotFoundException extends RuntimeException {
 }

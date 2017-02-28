@@ -1,7 +1,4 @@
-package fr.joand;
-
-import fr.joand.model.Edge;
-import fr.joand.model.Factory;
+import com.sun.javafx.geom.Edge;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -11,7 +8,8 @@ import java.util.List;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class AppTest {
+public class PlayerTest {
+    /*
     private static List<Factory> factories;
     private static List<Edge> edges;
 
@@ -23,18 +21,18 @@ public class AppTest {
 
     @Test
     public void calculateOportunityScore() {
-        App.calculateOpportunityScore(factories, edges);
+        Player.calculateOpportunityScore(factories, edges);
     }
 
 
     @Test
     public void calculateDangerScore() {
-        App.calculateDangerScore(factories, edges);
+        Player.calculateDangerScore(factories, edges);
     }
 
     @Test
     public void takeADecision(){
-        String action = App.takeADecision(factories, edges);
+        String action = Player.takeADecision(factories, edges);
     }
-
+//*/
 }
