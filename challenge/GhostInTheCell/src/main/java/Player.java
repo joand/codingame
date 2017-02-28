@@ -15,8 +15,7 @@ import java.util.Objects;
 class Player {
 
     /**
-     * @return the full Edge
-     * @throws ElementNotFoundException if asked Edge is not found
+     * @return the full Edge or null if not found
      */
     public static Edge getEdge(List<Edge> edges, int factoryId_A, int factoryId_B) {
         return edges.stream()
@@ -24,7 +23,7 @@ class Player {
                         ||
                         (edge.getFactoryId_A() == factoryId_B && edge.getFactoryId_B() == factoryId_A)
                 )
-                .findAny().orElseThrow(ElementNotFoundException::new);
+                .findFirst().orElse(null);
     }
 
     /**
@@ -45,21 +44,19 @@ class Player {
             Factory factory = new Factory(id);
             factories.add(factory);
         }
-        System.err.println("factoryCount : " + factoryCount);
 
         int linkCount = in.nextInt(); // the number of links between factories
         List<Edge> edges = new ArrayList<>(linkCount);
-        System.err.println("linkCount : " + linkCount);
         for (int i = 0; i < linkCount; i++) {
             int factory1 = in.nextInt();
             int factory2 = in.nextInt();
             int distance = in.nextInt();
 
             Edge edge = new Edge(factory1, factory2, distance);
-            System.err.println("edge : " + edge.toString());
             edges.add(edge);
         }
 
+        List<Bomb> bombs = new ArrayList<>(4);
         // game loop
         while (true) {
             int entityCount = in.nextInt(); // the number of entities (e.g. factories and troops)
@@ -79,16 +76,9 @@ class Player {
                         int production = arg3;
                         Factory factory = getFactory(factories, entityId);
                         if (factory != null) {
-                            int previousProduction = factory.getProduction();
-                            if (previousProduction != production) {
-                                System.err.println("production changed !");
-                            }
                             factory.setOwner(owner);
                             factory.setStockOfCyborgs(nbOfCyborgsInFactory);
                             factory.setProduction(production);
-                            System.err.println("factory updated : " + factory.toString());
-                        } else {
-                            System.err.println("!!! FACTORY NOT FOUND !!!");
                         }
                         break;
                     case "TROOP":
@@ -100,8 +90,14 @@ class Player {
                         int remainingDistance = arg5;
 
                         Troop troop = new Troop(entityId, owner, nbOfCyborgsInTroop, remainingDistance, factoryIdDestination);
-                        System.err.println("troop created : " + troop.toString());
                         edge.addTroop(troop);
+                        break;
+                    case "BOMB":
+                        int sourceFactoryId = arg2;
+                        int targetFactoryId = arg3;
+                        int countdown = arg4;
+                        Bomb bomb = new Bomb(entityId, owner, sourceFactoryId, targetFactoryId, countdown);
+                        bombs.add(bomb);
                         break;
                     default:
                         break;
@@ -112,7 +108,7 @@ class Player {
             calculateOpportunityScore(factories, edges);
             calculateDangerScore(factories, edges);
 
-            takeADecision(factories, edges);
+            takeADecision(factories, edges, bombs);
             clearTroopsFrom(edges);
         }
     }
@@ -139,6 +135,25 @@ class Player {
 
             factory.setOpportunityScore(maxScore);
         }
+    }
+
+    public static Factory getNearestAllyNeighbors(List<Factory> factories, List<Edge> edges, Factory factory) {
+        List<Factory> allyNeighbors = getAllyNeighbors(factories, edges, factory);
+
+        if (allyNeighbors.size() == 1) {
+            return allyNeighbors.get(0);
+        }
+
+        int minDistance = 100000;
+        Factory result = null;
+        for (Factory allyNeighbor : allyNeighbors) {
+            int distance = getEdge(edges, allyNeighbor.getId(), factory.getId()).getDistance();
+            if (distance < minDistance) {
+                minDistance = distance;
+                result = allyNeighbor;
+            }
+        }
+        return result;
     }
 
     public static List<Factory> getAllyNeighbors(List<Factory> factories, List<Edge> edges, Factory factory) {
@@ -188,7 +203,7 @@ class Player {
      * Any valid action, such as "WAIT" or "MOVE source destination cyborgs" <br/>
      * based on production & distance
      */
-    public static void takeADecision(List<Factory> factories, List<Edge> edges) {
+    public static void takeADecision(List<Factory> factories, List<Edge> edges, List<Bomb> bombs) {
         // trier les factories pour avoir les > opportunity score en premier
         List<Factory> opportunitySorted = factories.stream().sorted((o1, o2) -> o2.getOpportunityScore() - o1.getOpportunityScore()).collect(Collectors.toList());
         List<Factory> dangerSorted = factories.stream().sorted((o1, o2) -> o2.getDangerScore() - o1.getDangerScore()).collect(Collectors.toList());
@@ -197,60 +212,130 @@ class Player {
         List<Factory> toDefend = dangerSorted.stream().filter(factory -> factory.getOwner() == Owner.ally).collect(Collectors.toList());
         List<Factory> toConquer = opportunitySorted.stream().filter(factory -> factory.getOwner() != Owner.ally).collect(Collectors.toList());
 
-        //if (opening(factories, allies)) {
-        // conquérir le plus rapidement
-
         StringBuffer action = new StringBuffer();
-        // offensive
-        int weaponSize = 2;
-        for (Factory target : toConquer) {
-            // je prend celui qui a le plus de cyborgs... c'est plus facile à trouver
-            Factory source = getAllyNeighbors(factories, edges, target).stream()
-                    .sorted((o1, o2) -> o2.getStockOfCyborgs() - o1.getStockOfCyborgs())
-                    .findFirst().get();
-                action.append(move(source.getId(), target.getId(), Math.round((float) source.getStockOfCyborgs() / (float) weaponSize)));
-            }
-
-        // defensive
-        int shieldSize = 2;
-        for (Factory target : toDefend) {
-            Factory source = getAllyNeighbors(factories, edges, target).stream()
-                    .sorted((o1, o2) -> o2.getStockOfCyborgs() - o1.getStockOfCyborgs())
-                    .findFirst().orElse(null);
-            if (target.getDangerScore() > 0 && source != null) {
-                action.append(move(source.getId(), target.getId(), Math.round((float) source.getStockOfCyborgs() / (float) shieldSize)));
-            }
-        }
-        /*
+        if (opening()) {
+            // conquérir le plus rapidement : attaque + défense dans cet ordre
+            assault(factories, edges, toConquer, action, 0.5f);
+            counterMeasure(factories, edges, toDefend, action, 0.5f);
+            sendAllBombs(factories, edges, bombs, action);
         } else if (midGame()) {
-            // construire, défendre et attaquer
+            // construire et défendre only
+            sendAllBombs(factories, edges, bombs, action);
+            counterMeasure(factories, edges, toDefend, action, 0.5f);
+            increaseProduction(factories);
         } else if (endGame()) {
             // achever
+            assault(factories, edges, toConquer, action, 0.75f);
         }
-        //*/
-        System.out.println(action.toString() + "MSG end turn");
+
+        System.out.println(action.toString() + "MSG soli Deo gloria");
     }
 
-    private static boolean opening(List<Factory> factories, List<Factory> allies) {
-        return allies.size() / factories.size() < 0.5;
+    private static void sendAllBombs(List<Factory> factories, List<Edge> edges, List<Bomb> bombs, StringBuffer action) {
+        List<Bomb> usedBombs = bombs.stream().filter(bomb -> bomb.getOwner() == Owner.ally).collect(Collectors.toList());
+        if (usedBombs.size() == 0) {
+            List<Factory> targets = factories.stream()
+                    .filter(factory -> factory.getOwner() == Owner.enemy)
+                    .sorted((o1, o2) -> o2.getProduction() - o1.getProduction())
+                    .collect(Collectors.toList());
+            if (targets.size() >= 2 && targets.get(0).getProduction() >= 2 && targets.get(1).getProduction() >= 2) {
+                sendBomb(factories, edges, targets.get(0), action);
+                sendBomb(factories, edges, targets.get(1), action);
+            }
+        }
     }
 
-    private static boolean midGame() {
+    private static void sendBomb(List<Factory> factories, List<Edge> edges, Factory target, StringBuffer action) {
+        int source = getNearestAllyNeighbors(factories, edges, target).getId();
+        int destination = target.getId();
+        action.append("BOMB " + source + " " + destination + ";");
+        increaseProduction(factories);
+    }
+
+    private static void increaseProduction(List<Factory> factories) {
+        // todo
+    }
+
+    private static void counterMeasure(List<Factory> factories, List<Edge> edges, List<Factory> toDefend, StringBuffer action, float shieldSize) {
+        // defensive
+        for (Factory target : toDefend) {
+            Factory strongestSource = getAllyNeighbors(factories, edges, target).stream()
+                    .sorted((o1, o2) -> o2.getStockOfCyborgs() - o1.getStockOfCyborgs())
+                    .findFirst().orElse(null);
+/*
+            int strongestDist = getEdge(edges, target.getId(), strongestSource.getId()).getDistance();
+            Factory nearestSource = getNearestAllyNeighbors(factories, edges, target);
+            int nearestDistance = getEdge(edges, target.getId(), nearestSource.getId()).getDistance();
+//*/
+            if (target.getDangerScore() > 0) {
+                if (strongestSource != null) {
+                    int strongest = Math.round((float) strongestSource.getStockOfCyborgs() * shieldSize);
+                    action.append(move(strongestSource.getId(), target.getId(), strongest, factories));
+                }
+                /*
+                if (nearestSource != null) {
+                    int nearest = Math.round((float) nearestSource.getStockOfCyborgs() * shieldSize);
+                    action.append(move(nearestSource.getId(), target.getId(), nearest, factories));
+                }
+                //*/
+            }
+        }
+    }
+
+    private static void assault(List<Factory> factories, List<Edge> edges, List<Factory> toConquer, StringBuffer action, float weaponSize) {
+        // offensive
+        for (Factory target : toConquer) {
+            Factory strongestSource = getAllyNeighbors(factories, edges, target).stream()
+                    .sorted((o1, o2) -> o2.getStockOfCyborgs() - o1.getStockOfCyborgs())
+                    .findFirst().orElse(null);
+/*
+            int strongestDist = getEdge(edges, target.getId(), strongestSource.getId()).getDistance();
+            Factory nearestSource = getNearestAllyNeighbors(factories, edges, target);
+            int nearestDistance = getEdge(edges, target.getId(), nearestSource.getId()).getDistance();
+//*/
+            if (strongestSource != null) {
+                int strongest = Math.round((float) strongestSource.getStockOfCyborgs() * weaponSize);
+                action.append(move(strongestSource.getId(), target.getId(), strongest, factories));
+            }
+            /*
+            if (nearestSource != null) {
+                int nearest = Math.round((float) nearestSource.getStockOfCyborgs() * weaponSize);
+                action.append(move(nearestSource.getId(), target.getId(), nearest, factories));
+            }
+            //*/
+        }
+    }
+
+    // todo
+    public static boolean opening() {
+        return true;
+    }
+
+    // todo
+    public static boolean midGame() {
         return false;
     }
 
-    private static boolean endGame() {
+    // todo
+    public static boolean endGame() {
         return false;
     }
 
-    private static List<Edge> getConnectedEdges(Factory factory, List<Edge> edges) {
+    public static List<Edge> getConnectedEdges(Factory factory, List<Edge> edges) {
         return edges.stream()
                 .filter(edge -> edge.getFactoryId_A() == factory.getId() || edge.getFactoryId_B() == factory.getId())
                 .collect(Collectors.toList());
     }
 
-    public static String move(int source, int destination, int cyborgs) {
-        return "MOVE " + source + " " + destination + " " + cyborgs + ";";
+    public static String move(int source, int destination, int nbOfCyborgs, List<Factory> factories) {
+        /*
+        Factory from = factories.stream().filter(factory -> factory.getId() == source).findFirst().get();
+        from.setStockOfCyborgs(from.getStockOfCyborgs() - nbOfCyborgs);
+
+        Factory to = factories.stream().filter(factory -> factory.getId() == destination).findFirst().get();
+        to.setStockOfCyborgs(to.getStockOfCyborgs() + nbOfCyborgs);
+        //*/
+        return "MOVE " + source + " " + destination + " " + nbOfCyborgs + ";";
     }
 }
 
@@ -270,7 +355,7 @@ class Edge {
 
     /**
      * creates partial Edge with empty troops and invalid distance(-1)
-     * */
+     */
     public Edge(int factoryId_A, int factoryId_B) {
         this.factoryId_A = factoryId_A;
         this.factoryId_B = factoryId_B;
@@ -281,9 +366,10 @@ class Edge {
         troops.add(troop);
     }
 
-    public void clearTroops(){
+    public void clearTroops() {
         troops.clear();
     }
+
     /**
      * @return a copy of troops
      */
@@ -306,7 +392,7 @@ class Edge {
     /**
      * Edges are given with an orientation (from-to) BUT troops can move both ways
      * so this method tests only the facories' id in both ways
-     * */
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -502,5 +588,38 @@ enum Owner {
     }
 }
 
-class ElementNotFoundException extends RuntimeException {
+class Bomb {
+    private int id;
+    private Owner owner;
+    private int sourceFactoryId;
+    private int targetFactoryId;
+    private int countdown;
+
+    public Bomb(int id, Owner owner, int sourceFactoryId, int targetFactoryId, int countdown) {
+        this.id = id;
+        this.owner = owner;
+        this.sourceFactoryId = sourceFactoryId;
+        this.targetFactoryId = targetFactoryId;
+        this.countdown = countdown;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public Owner getOwner() {
+        return owner;
+    }
+
+    public int getSourceFactoryId() {
+        return sourceFactoryId;
+    }
+
+    public int getTargetFactoryId() {
+        return targetFactoryId;
+    }
+
+    public int getCountdown() {
+        return countdown;
+    }
 }
