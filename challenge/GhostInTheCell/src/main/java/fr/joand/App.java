@@ -201,8 +201,8 @@ public class App {
         List<Factory> dangerSorted = factories.stream().sorted((o1, o2) -> o2.getDangerScore() - o1.getDangerScore()).collect(Collectors.toList());
 
         // filtrer par Owner
-        List<Factory> allies = dangerSorted.stream().filter(factory -> factory.getOwner() == Owner.ally).collect(Collectors.toList());
-        List<Factory> others = opportunitySorted.stream().filter(factory -> factory.getOwner() != Owner.ally).collect(Collectors.toList());
+        List<Factory> toDefend = dangerSorted.stream().filter(factory -> factory.getOwner() == Owner.ally).collect(Collectors.toList());
+        List<Factory> toConquer = opportunitySorted.stream().filter(factory -> factory.getOwner() != Owner.ally).collect(Collectors.toList());
 
         //if (opening(factories, allies)) {
         // conquérir le plus rapidement
@@ -210,17 +210,17 @@ public class App {
         StringBuffer action = new StringBuffer();
         // offensive
         int weaponSize = 2;
-        for (Factory target : others) {
-            // je prend celui qui a le plus de cyborgs...
+        for (Factory target : toConquer) {
+            // je prend celui qui a le plus de cyborgs... c'est plus facile à trouver
             Factory source = getAllyNeighbors(factories, edges, target).stream()
                     .sorted((o1, o2) -> o2.getStockOfCyborgs() - o1.getStockOfCyborgs())
                     .findFirst().get();
-            action.append(move(source.getId(), target.getId(), Math.round((float) source.getStockOfCyborgs() / (float) weaponSize)));
-        }
+                action.append(move(source.getId(), target.getId(), Math.round((float) source.getStockOfCyborgs() / (float) weaponSize)));
+            }
 
         // defensive
         int shieldSize = 2;
-        for (Factory target : allies) {
+        for (Factory target : toDefend) {
             Factory source = getAllyNeighbors(factories, edges, target).stream()
                     .sorted((o1, o2) -> o2.getStockOfCyborgs() - o1.getStockOfCyborgs())
                     .findFirst().orElse(null);
