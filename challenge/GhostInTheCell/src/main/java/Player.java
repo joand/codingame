@@ -127,7 +127,6 @@ class Player {
      * FOR ENEMY   production [divide by] distance from ally + danger score <br/>
      * FOR NEUTRAL production + distance from enemy [divide by] danger score <br/>
      * the bigger the better !
-     *
      */
     public static void computeOpportunityScore(List<Factory> factories, List<Edge> edges, boolean isDangerScoreComputed) {
         if (isDangerScoreComputed) {
@@ -394,10 +393,9 @@ class Player {
                 .sorted((o1, o2) -> o2.getOpportunityScore() - o1.getOpportunityScore())
                 .collect(Collectors.toList());
         for (Factory ally : allies) {
-            if (toConquer.size() >= 2) {
-                int nbOfCyborgs = ally.getStockOfCyborgs() / 2;
-                action.append(move(ally.getId(), toConquer.get(0).getId(), nbOfCyborgs, factories, edges));
-                action.append(move(ally.getId(), toConquer.get(1).getId(), nbOfCyborgs, factories, edges));
+            for (Factory target : toConquer) {
+                int nbOfCyborgs = Math.round(target.getDangerScore()) + 1;
+                action.append(move(ally.getId(), target.getId(), nbOfCyborgs, factories, edges));
             }
         }
     }
