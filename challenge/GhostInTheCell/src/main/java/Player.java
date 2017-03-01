@@ -220,9 +220,9 @@ class Player {
             sendAllBombs(factories, edges, bombs, action);
         } else if (midGame()) {
             // construire et défendre only
-            sendAllBombs(factories, edges, bombs, action);
+            sendAllBombs(factories, edges, bombs, action); // todo change that
             counterMeasure(factories, edges, toDefend, action, 0.5f);
-            increaseProduction(factories);
+            increaseProduction(factories, edges, action);
         } else if (endGame()) {
             // achever
             assault(factories, edges, toConquer, action, 0.75f);
@@ -249,11 +249,30 @@ class Player {
         int source = getNearestAllyNeighbors(factories, edges, target).getId();
         int destination = target.getId();
         action.append("BOMB " + source + " " + destination + ";");
-        increaseProduction(factories);
+        increaseProduction(factories, edges, action);
     }
 
-    private static void increaseProduction(List<Factory> factories) {
-        // todo
+    private static void increaseProduction(List<Factory> factories, List<Edge> edges, StringBuffer action) {
+        List<Factory> allies = factories.stream().filter(factory -> factory.getOwner() == Owner.ally).collect(Collectors.toList());
+        List<Factory> providers = allies.stream().filter(factory -> factory.getStockOfCyborgs() > factory.getDangerScore() + 10).collect(Collectors.toList());
+        for (Factory provider : providers) {
+            if (provider.getProduction() < 3) {
+                action.append("INC " + provider.getId() + ";");
+            } else {
+                // envoyer les 10 cyborgs au voisin le plus proche qui a factory.getProduction() < 3
+                /*
+                List<Factory> allyNeighbors = getAllyNeighbors(factories, edges, provider).stream()
+                        .filter(ally -> ally.getProduction() < 3).collect(Collectors.toList());
+                Factory destination = getNearestAllyNeighbors(allyNeighbors, edges, provider); // null pointer exception
+                //*/
+                Factory destination = getAllyNeighbors(factories, edges, provider).stream()
+                        .filter(ally -> ally.getProduction() < 3)
+                        .sorted((o1, o2) -> o1.getDangerScore() - o2.getDangerScore()).findFirst().orElse(null);
+                if (destination != null) {
+                    move(provider.getId(), destination.getId(), 10, factories);
+                }
+            }
+        }
     }
 
     private static void counterMeasure(List<Factory> factories, List<Edge> edges, List<Factory> toDefend, StringBuffer action, float shieldSize) {
