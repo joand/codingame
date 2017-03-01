@@ -21,13 +21,13 @@ public class PlayerTest {
 
     @Test
     public void calculateOportunityScore() {
-        Player.calculateOpportunityScore(factories, edges);
+        Player.computeOpportunityScore(factories, edges);
     }
 
 
     @Test
-    public void calculateDangerScore() {
-        Player.calculateDangerScore(factories, edges);
+    public void computeDangerScore() {
+        Player.computeDangerScore(factories, edges);
     }
 
     @Test
