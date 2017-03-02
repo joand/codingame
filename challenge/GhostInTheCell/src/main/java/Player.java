@@ -78,11 +78,13 @@ class Player {
                     case "FACTORY":
                         int nbOfCyborgsInFactory = arg2;
                         int production = arg3;
+                        int remainingUnproductiveTurns = arg4;
                         Factory factory = getFactory(factories, entityId);
                         if (factory != null) {
                             factory.setOwner(owner);
                             factory.setStockOfCyborgs(nbOfCyborgsInFactory);
                             factory.setProduction(production);
+                            factory.setRemainingUnproductiveTurns(remainingUnproductiveTurns);
                         }
                         break;
                     case "TROOP":
@@ -118,6 +120,7 @@ class Player {
 
             takeADecision(factories, edges, bombs);
             clearTroopsFrom(edges);
+            factories.stream().forEach(factory -> factory.setSentABomb(false));
         }
     }
 
@@ -160,18 +163,19 @@ class Player {
      */
     private static void computeAllyOpportunityScore(List<Factory> factories, List<Edge> edges, Factory allyFactory, boolean isDangerScoreComputed) {
         if (isDangerScoreComputed) {
-            float maxScore = 0;
-            for (Factory enemyFactory : getEnemyNeighbors(factories, edges, allyFactory)) {
+            float sumScore = 0;
+            List<Factory> enemyNeighbors = getEnemyNeighbors(factories, edges, allyFactory);
+            for (Factory enemyFactory : enemyNeighbors) {
                 Edge edge = getEdge(edges, allyFactory.getId(), enemyFactory.getId());
                 if (edge != null) {
                     int production = allyFactory.getProduction();
                     // on ignore les factory qu'on ne peut plus increase dans la méthode d'increase
-                    float score = ((float) (production + edge.getDistance())) / allyFactory.getDangerScore();
-                    maxScore = Math.max(maxScore, score);
+                    float score = ((float) (production * edge.getDistance())) / allyFactory.getDangerScore();
+                    sumScore += score;
                 }
             }
-
-            allyFactory.setOpportunityScore(maxScore);
+            float averageScore = sumScore / enemyNeighbors.size();
+            allyFactory.setOpportunityScore(averageScore);
         } else {
             System.err.println("IMPOSSIBLE ERROR : DANGER SCORE HAS NOT BEEN COMPUTED");
         }
@@ -183,16 +187,17 @@ class Player {
      */
     private static void computeNeutralOpportunityScore(List<Factory> factories, List<Edge> edges, Factory neutralFactory, boolean isDangerScoreComputed) {
         if (isDangerScoreComputed) {
-            float maxScore = 0;
-            for (Factory enemyFactory : getEnemyNeighbors(factories, edges, neutralFactory)) {
+            float sumScore = 0;
+            List<Factory> enemyNeighbors = getEnemyNeighbors(factories, edges, neutralFactory);
+            for (Factory enemyFactory : enemyNeighbors) {
                 Edge edge = getEdge(edges, neutralFactory.getId(), enemyFactory.getId());
                 if (edge != null) {
                     float score = ((float) (neutralFactory.getProduction() + edge.getDistance())) / neutralFactory.getDangerScore();
-                    maxScore = Math.max(maxScore, score);
+                    sumScore += score;
                 }
             }
-
-            neutralFactory.setOpportunityScore(maxScore);
+            float averageScore = sumScore / enemyNeighbors.size();
+            neutralFactory.setOpportunityScore(averageScore);
         } else {
             System.err.println("IMPOSSIBLE ERROR : DANGER SCORE HAS NOT BEEN COMPUTED");
         }
@@ -366,6 +371,7 @@ class Player {
         List<Factory> optimized = factories.stream()
                 .sorted((o1, o2) -> sortByOpportunityDesc(o1, o2))
                 .collect(Collectors.toList());
+        optimized.forEach(factory -> System.err.println("takeADecision opportunity desc : " + factory.toString()));
         for (Factory factory : optimized) {
             switch (factory.getOwner()) {
                 case ally:
@@ -407,7 +413,7 @@ class Player {
 
     /**
      * old school !
-     * */
+     */
     private static void sendAllBombs(List<Factory> factories, List<Edge> edges, List<Bomb> bombs, StringBuffer action) {
         List<Bomb> usedBombs = bombs.stream()
                 .filter(bomb -> bomb.getOwner() == Owner.ally)
@@ -426,9 +432,12 @@ class Player {
     }
 
     private static void sendBomb(List<Factory> factories, List<Edge> edges, Factory target, StringBuffer action) {
-        int source = getNearestAllyNeighbors(factories, edges, target).getId();
+        Factory from = getNearestAllyNeighbors(factories, edges, target);
+        from.setSentABomb(true);
+        int source = from.getId();
         int destination = target.getId();
         action.append("BOMB " + source + " " + destination + ";");
+        System.err.println("sending a bomb from factory " + source + " to factory " + destination);
     }
 
     /**
@@ -441,10 +450,12 @@ class Player {
                 .filter(factory -> factory.getOwner() == Owner.ally
                         && factory.getStockOfCyborgs() > factory.getDangerScore() + 10
                         && factory.getProduction() < 3
+                        && factory.getRemainingUnproductiveTurns() == 0
                 )
                 .sorted((o1, o2) -> sortByOpportunityDesc(o1, o2))
                 .collect(Collectors.toList());
         for (Factory provider : increaseReady) {
+            System.err.println("increase production for factory " + provider.getId());
             action.append("INC " + provider.getId() + ";");
             provider.setStockOfCyborgs(provider.getStockOfCyborgs() - 10);
             provider.setProduction(provider.getProduction() + 1);
@@ -464,6 +475,7 @@ class Player {
         // defensive
         for (Factory target : toDefend) {
             if (target.getDangerScore() > 0) {
+                System.err.println("mitigate factory : " + target.getId() + ". Danger score : " + target.getDangerScore());
                 mitigate(factories, edges, target, action);
             } else {
                 target.setSpreadAllowed(true);
@@ -477,6 +489,9 @@ class Player {
      */
     static void mitigate(List<Factory> factories, List<Edge> edges, Factory toDefend, StringBuffer action) {
         List<Factory> allyNeighbors = getAllyNeighbors(factories, edges, toDefend);
+        allyNeighbors = allyNeighbors.stream()
+                .filter(factory -> factory.isSpreadAllowed() && !factory.sentABomb())
+                .collect(Collectors.toList());
 
         int totalArmy = 0;
         for (Factory ally : allyNeighbors) {
@@ -484,12 +499,14 @@ class Player {
             totalArmy += localArmy;
         }
         if (totalArmy > toDefend.getDangerScore()) {
+            System.err.println("sending backup to factory " + toDefend.getId());
             toDefend.setSpreadAllowed(false);
             for (Factory source : allyNeighbors) {
                 int localArmy = getLocalArmy(source);
                 action.append(move(source.getId(), toDefend.getId(), localArmy, factories, edges));
             }
         } else {
+            System.err.println("they are too powerful ! give up factory " + toDefend.getId());
             Factory lostFactory = toDefend;
             runAway(factories, edges, lostFactory, action);
         }
@@ -522,7 +539,7 @@ class Player {
      */
     private static void spreadNeutral(List<Factory> factories, List<Edge> edges, StringBuffer action) {
         List<Factory> allies = factories.stream()
-                .filter(factory -> factory.getOwner() == Owner.ally && factory.isSpreadAllowed())
+                .filter(factory -> factory.getOwner() == Owner.ally && factory.isSpreadAllowed() && !factory.sentABomb())
                 .sorted((o1, o2) -> o2.getStockOfCyborgs() - o1.getStockOfCyborgs())
                 .collect(Collectors.toList());
 
@@ -530,6 +547,7 @@ class Player {
                 .filter(factory -> factory.getOwner() == Owner.neutral)
                 .sorted((o1, o2) -> sortByOpportunityDesc(o1, o2))
                 .collect(Collectors.toList());
+        toConquer.forEach(factory -> System.err.println("spreadNeutral OpportunityDesc : " + factory.toString()));
         for (Factory ally : allies) {
             for (Factory target : toConquer) {
                 int nbOfCyborgs = Math.round(target.getDangerScore()) + 1;
@@ -548,7 +566,8 @@ class Player {
     private static void assault(List<Factory> factories, List<Edge> edges, Factory target, StringBuffer action) {
         List<Factory> allyNeighbors = getAllyNeighbors(factories, edges, target);
         allyNeighbors = allyNeighbors.stream()
-                .filter(factory -> factory.isSpreadAllowed()).collect(Collectors.toList());
+                .filter(factory -> factory.isSpreadAllowed() && !factory.sentABomb())
+                .collect(Collectors.toList());
 
         int totalArmy = 0;
         for (Factory source : allyNeighbors) {
@@ -556,6 +575,7 @@ class Player {
             totalArmy += localArmy;
         }
         if (totalArmy > target.getDangerScore()) {
+            System.err.println("Assault factory " + target.getId());
             for (Factory source : allyNeighbors) {
                 int localArmy = getLocalArmy(source);
                 action.append(move(source.getId(), target.getId(), localArmy, factories, edges));
@@ -722,10 +742,30 @@ class Factory {
      */
     private float dangerScore = 0;
 
+    private int remainingUnproductiveTurns;
+
+    private boolean sentABomb = false;
+
     private boolean spreadAllowed = true;
 
     public boolean isSpreadAllowed() {
         return spreadAllowed;
+    }
+
+    public void setSentABomb(boolean sentABomb) {
+        this.sentABomb = sentABomb;
+    }
+
+    public boolean sentABomb() {
+        return this.sentABomb;
+    }
+
+    public int getRemainingUnproductiveTurns() {
+        return remainingUnproductiveTurns;
+    }
+
+    public void setRemainingUnproductiveTurns(int remainingUnproductiveTurns) {
+        this.remainingUnproductiveTurns = remainingUnproductiveTurns;
     }
 
     public void setSpreadAllowed(boolean spreadAllowed) {
@@ -828,6 +868,11 @@ class Factory {
                 ", owner=" + owner +
                 ", stockOfCyborgs=" + stockOfCyborgs +
                 ", production=" + production +
+                ", opportunityScore=" + opportunityScore +
+                ", dangerScore=" + dangerScore +
+                ", remainingUnproductiveTurns=" + remainingUnproductiveTurns +
+                ", sentABomb=" + sentABomb +
+                ", spreadAllowed=" + spreadAllowed +
                 '}';
     }
 }
