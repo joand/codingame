@@ -360,7 +360,8 @@ class Player {
         // todo se "défendre" contre bombes ennemies : kernel panic, aller sur des longs chemins
         // todo juste avant d'envoyer les bombes, vérifier si une à nous est en cours d'envoie puis lancer une troop à sa suite
         // si on envoie 2 bombes au même endroit attendre au moins le retour à la normal de la victime avant d'envoyer la bombe sur la meme cible
-        sendOneBomb(factories, edges, bombs, action); // always first
+        //sendOneBomb(factories, edges, bombs, action); // always first
+        sendAllBombs(factories, edges, bombs, action);
 
         List<Factory> optimized = factories.stream()
                 .sorted((o1, o2) -> sortByOpportunityDesc(o1, o2))
@@ -402,6 +403,32 @@ class Player {
                 //increaseProduction(factories, edges, action);
             }
         }
+    }
+
+    /**
+     * old school !
+     * */
+    private static void sendAllBombs(List<Factory> factories, List<Edge> edges, List<Bomb> bombs, StringBuffer action) {
+        List<Bomb> usedBombs = bombs.stream()
+                .filter(bomb -> bomb.getOwner() == Owner.ally)
+                .collect(Collectors.toList());
+        if (usedBombs.size() == 0) {
+            List<Factory> targets = factories.stream()
+                    .filter(factory -> factory.getOwner() == Owner.enemy && factory.getProduction() >= 2)
+                    .sorted((o1, o2) -> o2.getProduction() - o1.getProduction())
+                    .sorted((o1, o2) -> Math.round(o2.getDangerScore()) - Math.round(o1.getDangerScore()))
+                    .collect(Collectors.toList());
+            if (targets.size() >= 2) {
+                sendBomb(factories, edges, targets.get(0), action);
+                sendBomb(factories, edges, targets.get(1), action);
+            }
+        }
+    }
+
+    private static void sendBomb(List<Factory> factories, List<Edge> edges, Factory target, StringBuffer action) {
+        int source = getNearestAllyNeighbors(factories, edges, target).getId();
+        int destination = target.getId();
+        action.append("BOMB " + source + " " + destination + ";");
     }
 
     /**
