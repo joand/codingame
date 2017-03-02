@@ -26,8 +26,8 @@ public class PlayerTest {
 
 
     @Test
-    public void computeDangerScore() {
-        Player.computeDangerScore(factories, edges);
+    public void computeAllDangerScore() {
+        Player.computeAllDangerScore(factories, edges);
     }
 
     @Test
