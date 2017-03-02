@@ -348,7 +348,7 @@ class Player {
                 .sorted((o1, o2) -> Math.round(o2.getDangerScore()) - Math.round(o1.getDangerScore()))
                 .collect(Collectors.toList());
         counterMeasure(factories, edges, allies, action); // 2 façons de défendre : mitigate et runaway
-
+        // todo se "défendre" contre bombes ennemies : kernel panic, aller sur des longs chemins
         // todo juste avant d'envoyer les bombes, vérifier si une à nous est en cours d'envoie puis lancer une troop à sa suite
         sendOneBomb(factories, edges, bombs, action); // always first
         for (Factory factory : factories) {
@@ -534,7 +534,7 @@ class Player {
      * todo : agir
      */
     public static String move(int source, int destination, int nbOfCyborgs, List<Factory> factories, List<Edge> edges) {
-        if (nbOfCyborgs < 0) {
+        if (nbOfCyborgs <= 0 || source == destination) {
             return "WAIT;";
         } else {
             // mettre à jour les stats
@@ -547,7 +547,9 @@ class Player {
                 to.setStockOfCyborgs(to.getStockOfCyborgs() + nbOfCyborgs);
             }
             // maj les indicateurs
-            Factory target = factories.stream().filter(factory -> factory.getId() == destination).findFirst().orElse(null);
+            Factory target = factories.stream()
+                    .filter(factory -> factory.getId() == destination)
+                    .findFirst().orElse(null);
             if (target != null) {
                 boolean isDangerScoreComputed = computeDangerScore(target, edges);
                 switch (target.getOwner()) {
