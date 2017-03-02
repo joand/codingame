@@ -339,19 +339,33 @@ class Player {
     /**
      * Any valid action, such as "WAIT" or "MOVE source destination cyborgs" <br/>
      * based on production & distance
+     * <p>
+     * One game turn is computed as follows:
+     * <p>
+     * Move existing troops and bombs
+     * Execute user orders
+     * Produce new cyborgs in all factories
+     * Solve battles
+     * Make the bombs explode
+     * Check end conditions
      */
     public static void takeADecision(List<Factory> factories, List<Edge> edges, List<Bomb> bombs) {
         StringBuffer action = new StringBuffer();
 
         List<Factory> allies = factories.stream()
                 .filter(factory -> factory.getOwner() == Owner.ally)
-                .sorted((o1, o2) -> Math.round(o2.getDangerScore()) - Math.round(o1.getDangerScore()))
+                .sorted((o1, o2) -> sortByDangerScoreDesc(o1, o2))
                 .collect(Collectors.toList());
         counterMeasure(factories, edges, allies, action); // 2 façons de défendre : mitigate et runaway
         // todo se "défendre" contre bombes ennemies : kernel panic, aller sur des longs chemins
         // todo juste avant d'envoyer les bombes, vérifier si une à nous est en cours d'envoie puis lancer une troop à sa suite
+        // si on envoie 2 bombes au même endroit attendre au moins le retour à la normal de la victime avant d'envoyer la bombe sur la meme cible
         sendOneBomb(factories, edges, bombs, action); // always first
-        for (Factory factory : factories) {
+
+        List<Factory> optimized = factories.stream()
+                .sorted((o1, o2) -> sortByOpportunityDesc(o1, o2))
+                .collect(Collectors.toList());
+        for (Factory factory : optimized) {
             switch (factory.getOwner()) {
                 case ally:
                     increaseProduction(factories, edges, action);
@@ -376,14 +390,14 @@ class Player {
             Factory target = factories.stream()
                     .filter(factory -> factory.getOwner() == Owner.enemy && factory.getProduction() >= 2)
                     .sorted((o1, o2) -> o2.getProduction() - o1.getProduction())
-                    .sorted((o1, o2) -> Math.round(o2.getDangerScore()) - Math.round(o1.getDangerScore()))
+                    .sorted((o1, o2) -> sortByDangerScoreDesc(o1, o2))
                     .findFirst().orElse(null);
             if (target != null) {
                 int source = getNearestAllyNeighbors(factories, edges, target)
                         .getId();
                 int destination = target.getId();
                 action.append("BOMB " + source + " " + destination + ";");
-
+                // target.setBombing(); todo : indiquer qu'une factory est en train d'être bombardée et donc ne pas la prendre pour cible
                 // todo : retarder cette action ? (la faire avec la même logique d'attente que l'escouade qui suit la bombe)
                 //increaseProduction(factories, edges, action);
             }
@@ -401,7 +415,7 @@ class Player {
                         && factory.getStockOfCyborgs() > factory.getDangerScore() + 10
                         && factory.getProduction() < 3
                 )
-                .sorted((o1, o2) -> Math.round(o2.getOpportunityScore()) - Math.round(o1.getOpportunityScore()))
+                .sorted((o1, o2) -> sortByOpportunityDesc(o1, o2))
                 .collect(Collectors.toList());
         for (Factory provider : increaseReady) {
             action.append("INC " + provider.getId() + ";");
@@ -410,6 +424,10 @@ class Player {
             boolean isDangerScoreComputed = computeDangerScore(provider, edges);
             computeAllyOpportunityScore(factories, edges, provider, isDangerScoreComputed);
         }
+    }
+
+    private static int sortByOpportunityDesc(Factory o1, Factory o2) {
+        return Math.round(o2.getOpportunityScore() - o1.getOpportunityScore());
     }
 
     /**
@@ -458,13 +476,18 @@ class Player {
         lostFactory.setSpreadAllowed(true);
         List<Factory> shelters = factories.stream()
                 .filter(factory -> factory.getOwner() == Owner.ally)
-                .sorted((o1, o2) -> Math.round(o2.getDangerScore()) - Math.round(o1.getDangerScore()))
+                .sorted((o1, o2) -> Math.round(o1.getDangerScore() - o2.getDangerScore()))
                 .collect(Collectors.toList());
 
         for (Factory shelter : shelters) {
+            // todo : la répartition homogène n'est pas forcément la meilleur solution
             int nbOfCyborgs = (lostFactory.getStockOfCyborgs() / shelters.size());
             action.append(move(lostFactory.getId(), shelter.getId(), nbOfCyborgs, factories, edges));
         }
+    }
+
+    private static int sortByDangerScoreDesc(Factory o1, Factory o2) {
+        return Math.round(o2.getDangerScore() - o1.getDangerScore());
     }
 
     /**
@@ -478,7 +501,7 @@ class Player {
 
         List<Factory> toConquer = factories.stream()
                 .filter(factory -> factory.getOwner() == Owner.neutral)
-                .sorted((o1, o2) -> Math.round(o2.getOpportunityScore()) - Math.round(o1.getOpportunityScore()))
+                .sorted((o1, o2) -> sortByOpportunityDesc(o1, o2))
                 .collect(Collectors.toList());
         for (Factory ally : allies) {
             for (Factory target : toConquer) {
