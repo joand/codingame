@@ -170,7 +170,8 @@ class Player {
                 if (edge != null) {
                     int production = allyFactory.getProduction();
                     // on ignore les factory qu'on ne peut plus increase dans la méthode d'increase
-                    float score = ((float) (production * edge.getDistance())) / allyFactory.getDangerScore();
+                    float dangerScore = allyFactory.getDangerScore() == 0 ? 1 : allyFactory.getDangerScore();
+                    float score = ((float) (production + edge.getDistance())) / dangerScore;
                     sumScore += score;
                 }
             }
@@ -192,7 +193,10 @@ class Player {
             for (Factory enemyFactory : enemyNeighbors) {
                 Edge edge = getEdge(edges, neutralFactory.getId(), enemyFactory.getId());
                 if (edge != null) {
-                    float score = ((float) (neutralFactory.getProduction() + edge.getDistance())) / neutralFactory.getDangerScore();
+                    float dangerScore = neutralFactory.getDangerScore() == 0 ?
+                            1 : neutralFactory.getDangerScore();
+                    float score = neutralFactory.getProduction() == 0 ?
+                            0 : ((float) (neutralFactory.getProduction() + edge.getDistance())) / dangerScore;
                     sumScore += score;
                 }
             }
