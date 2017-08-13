@@ -1,38 +1,37 @@
 package fr.joand.root;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
+import static fr.joand.root.Root.getMaxHeight;
+import static fr.joand.root.Root.getNodeOrStoreIt;
+import static junit.framework.Assert.assertEquals;
 
 /**
- * Unit test for simple App.
+ * Unit test for simple Root.
  */
-public class AppTest 
-    extends TestCase
-{
-    /**
-     * Create the test case
-     *
-     * @param testName name of the test case
-     */
-    public AppTest( String testName )
-    {
-        super( testName );
-    }
+public class AppTest {
+    @Test
+    public void testApp() {
+        Map<String, Node> allNodes = new HashMap<>();
 
-    /**
-     * @return the suite of tests being tested
-     */
-    public static Test suite()
-    {
-        return new TestSuite( AppTest.class );
-    }
+        String keyA = "A";
+        String keyB = "B";
 
-    /**
-     * Rigourous Test :-)
-     */
-    public void testApp()
-    {
-        assertTrue( true );
+        Node nodeA = getNodeOrStoreIt(keyA, allNodes);
+        Node nodeB = getNodeOrStoreIt(keyB, allNodes);
+
+        nodeA.addChild(nodeB);
+
+        assertEquals(2, getMaxHeight(new ArrayList(allNodes.values())));
+
+        String keyC = "C";
+        Node nodeC = getNodeOrStoreIt(keyC, allNodes);
+        nodeB.addChild(nodeC);
+
+        assertEquals(3, getMaxHeight(new ArrayList(allNodes.values())));
     }
 }

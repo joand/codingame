@@ -2,41 +2,73 @@ package fr.joand.root;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by user on 30/10/2016.
  */
-public class Node<T> {
-    private T data;
-    private Node<T> parent;
-    private List<Node<T>> children = new ArrayList<>();
+public class Node {
+    private final String data;
+    private Node parent;
+    private List<Node> children = new ArrayList<>();
 
-    public Node(T data) {
+    /**
+     * https://stackoverflow.com/questions/2603692/what-is-the-difference-between-tree-depth-and-height
+     */
+    private int height = 1;
+
+    public Node(String data) {
         this.data = data;
     }
 
-    public void addChild(Node<T> child){
+    public void addChild(Node child) {
         children.add(child);
+        computeHeight();
+
+        child.setParent(this);
+        if (parent != null) {
+            parent.computeHeight();
+        }
     }
 
-    public T getData() {
+    private void computeHeight() {
+        height = 1 + Root.getMaxHeight(children);
+    }
+
+    public String getData() {
         return data;
     }
 
-    public void setData(T data) {
-        this.data = data;
-    }
-
-    public Node<T> getParent() {
+    public Node getParent() {
         return parent;
     }
 
-    public void setParent(Node<T> parent) {
+    public void setParent(Node parent) {
         this.parent = parent;
     }
 
-    public List<Node<T>> getChildren() {
+    public List<Node> getChildren() {
         return children;
     }
 
+    public boolean isLeaf() {
+        return children.isEmpty();
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Node node = (Node) o;
+        return Objects.equals(data, node.data);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(data);
+    }
 }
