@@ -8,7 +8,7 @@
 package fr.joand.root;
 import java.util.*;
 
-public class Root {
+public class IsoContest {
 
     public static void main(String[] args) throws Exception {
 
@@ -28,12 +28,21 @@ public class Root {
             nodeA.addChild(nodeB);
         }
 
-        System.out.println(getMaxHeight(new ArrayList(allNodes.values())));
+        System.out.println(getMaxHeight(allNodes));
     }
 
     static int getMaxHeight(List<Node> nodes) {
         int maxHeight = 0;
         for (Node node : nodes) {
+            maxHeight = node.getHeight() > maxHeight ?
+                    node.getHeight() : maxHeight;
+        }
+        return maxHeight;
+    }
+
+    static int getMaxHeight(Map<String, Node> nodes) {
+        int maxHeight = 0;
+        for (Node node : nodes.values()) {
             maxHeight = node.getHeight() > maxHeight ?
                     node.getHeight() : maxHeight;
         }
@@ -81,7 +90,7 @@ class Node {
     }
 
     void computeHeight() {
-        this.height = 1 + Root.getMaxHeight(this.children);
+        this.height = 1 + IsoContest.getMaxHeight(this.children);
         if (this.parent != null) {
             this.parent.computeHeight();
         }
