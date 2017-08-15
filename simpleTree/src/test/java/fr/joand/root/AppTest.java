@@ -28,17 +28,20 @@ public class AppTest {
 
         String keyC = "C";
         Node nodeC = getNodeOrStoreIt(keyC, allNodes);
-        nodeB.addChild(nodeC);
+        Node nodeB_2 = getNodeOrStoreIt(keyB, allNodes);
+        nodeB_2.addChild(nodeC);
         assertEquals(3, getMaxHeight(allNodes));
 
         String keyD = "D";
         Node nodeD = getNodeOrStoreIt(keyD, allNodes);
-        nodeA.addChild(nodeD);
+        Node nodeA_2 = getNodeOrStoreIt(keyA, allNodes);
+        nodeA_2.addChild(nodeD);
         assertEquals(3, getMaxHeight(allNodes));
 
         String keyE = "E";
         Node nodeE = getNodeOrStoreIt(keyE, allNodes);
-        nodeE.addChild(nodeA);
+        Node nodeA_3 = getNodeOrStoreIt(keyA, allNodes);
+        nodeE.addChild(nodeA_3);
         assertEquals(4, getMaxHeight(allNodes));
 
     }

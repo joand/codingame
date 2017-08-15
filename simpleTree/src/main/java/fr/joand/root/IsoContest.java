@@ -2,10 +2,11 @@
  * Read input from System.in
  * Use System.out.println to ouput your result.
  * Use:
- *  IsoContestBase.localEcho( variable)
+ * IsoContestBase.localEcho( variable)
  * to display variable in a dedicated area.
- * ***/
+ ***/
 package fr.joand.root;
+
 import java.util.*;
 
 public class IsoContest {
@@ -14,9 +15,9 @@ public class IsoContest {
 
         Scanner sc = new Scanner(System.in);
         int nbOfRows = Integer.valueOf(sc.nextLine());
-        //IsoContestBase.localEcho("nbOfRows : "+nbOfRows);
+        System.out.println("***************************nbOfRows : " + nbOfRows);
         Map<String, Node> allNodes = new HashMap<>();
-        while (sc.hasNextLine()) {
+        for (int index = 0; index < nbOfRows; index++) {
             String line = sc.nextLine();
             String[] splitedLine = line.split(" ");
             String keyA = splitedLine[0];
@@ -29,6 +30,7 @@ public class IsoContest {
         }
 
         System.out.println(getMaxHeight(allNodes));
+        allNodes.clear();
     }
 
     static int getMaxHeight(List<Node> nodes) {
@@ -37,6 +39,7 @@ public class IsoContest {
             maxHeight = node.getHeight() > maxHeight ?
                     node.getHeight() : maxHeight;
         }
+        System.out.println("maxHeight : " + maxHeight);
         return maxHeight;
     }
 
@@ -46,31 +49,28 @@ public class IsoContest {
             maxHeight = node.getHeight() > maxHeight ?
                     node.getHeight() : maxHeight;
         }
+        System.out.println("FINAL ANSWER maxHeight : " + maxHeight);
         return maxHeight;
     }
 
     static Node getNodeOrStoreIt(String key, Map<String, Node> allNodes) {
         if (allNodes.containsKey(key)) {
-            return allNodes.get(key);
+            Node node = allNodes.get(key);
+            System.out.println("existing node : " + node.toString());
+            return node;
         } else {
             Node node = new Node(key);
+            System.out.println("creating node : " + node.toString());
             allNodes.put(key, node);
             return node;
         }
     }
 
-
-    void displayAllNodes(Node node) {
-        System.out.println(node.getData());
-        for (Node child : node.getChildren()) {
-            displayAllNodes(child);
-        }
-    }
 }
 
 class Node {
     final String data;
-    Node parent;
+    Node parent = null;
     List<Node> children = new ArrayList<>();
 
     /**
@@ -83,14 +83,15 @@ class Node {
     }
 
     public void addChild(Node child) {
+        System.out.println(this.data + " has a new child : " + child.data);
         this.children.add(child);
         computeHeight();
-
         child.setParent(this);
     }
 
     void computeHeight() {
         this.height = 1 + IsoContest.getMaxHeight(this.children);
+        System.out.println(this.data + " new height : " + this.height);
         if (this.parent != null) {
             this.parent.computeHeight();
         }
@@ -100,24 +101,30 @@ class Node {
         return data;
     }
 
-    public Node getParent() {
-        return parent;
-    }
-
     public void setParent(Node parent) {
         this.parent = parent;
-    }
-
-    public List<Node> getChildren() {
-        return children;
     }
 
     public boolean isLeaf() {
         return children.isEmpty();
     }
 
+    public boolean isRoot() {
+        return parent == null;
+    }
+
     public int getHeight() {
         return height;
+    }
+
+    @Override
+    public String toString() {
+        return "Node{" +
+                "data='" + data + '\'' +
+                ", parent=" + (parent != null ? parent.getData() : "null") +
+                ", nbOfChildren=" + children.size() +
+                ", height=" + height +
+                '}';
     }
 
     @Override
