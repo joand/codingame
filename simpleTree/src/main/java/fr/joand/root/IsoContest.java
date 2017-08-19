@@ -15,7 +15,7 @@ public class IsoContest {
 
         Scanner sc = new Scanner(System.in);
         int nbOfRows = Integer.valueOf(sc.nextLine());
-        System.out.println("***************************nbOfRows : " + nbOfRows);
+//        IsoContestBase.localEcho("***************************nbOfRows : " + nbOfRows);
         Map<String, Node> allNodes = new HashMap<>();
         for (int index = 0; index < nbOfRows; index++) {
             String line = sc.nextLine();
@@ -26,7 +26,7 @@ public class IsoContest {
             Node nodeA = getNodeOrStoreIt(keyA, allNodes);
             Node nodeB = getNodeOrStoreIt(keyB, allNodes);
 
-            nodeA.addChild(nodeB);
+            addChild(nodeA, nodeB);
         }
 
         System.out.println(getMaxHeight(allNodes));
@@ -36,10 +36,9 @@ public class IsoContest {
     static int getMaxHeight(List<Node> nodes) {
         int maxHeight = 0;
         for (Node node : nodes) {
-            maxHeight = node.getHeight() > maxHeight ?
-                    node.getHeight() : maxHeight;
+            maxHeight = Math.max(node.getHeight(), maxHeight);
         }
-        System.out.println("maxHeight : " + maxHeight);
+        //      IsoContestBase.localEcho("maxHeight : " + maxHeight);
         return maxHeight;
     }
 
@@ -49,20 +48,36 @@ public class IsoContest {
             maxHeight = node.getHeight() > maxHeight ?
                     node.getHeight() : maxHeight;
         }
-        System.out.println("FINAL ANSWER maxHeight : " + maxHeight);
+        //     IsoContestBase.localEcho("FINAL ANSWER maxHeight : " + maxHeight);
         return maxHeight;
     }
 
     static Node getNodeOrStoreIt(String key, Map<String, Node> allNodes) {
         if (allNodes.containsKey(key)) {
             Node node = allNodes.get(key);
-            System.out.println("existing node : " + node.toString());
+            //       IsoContestBase.localEcho("existing node : " + node.toString());
             return node;
         } else {
             Node node = new Node(key);
-            System.out.println("creating node : " + node.toString());
+            //     IsoContestBase.localEcho("creating node : " + node.toString());
             allNodes.put(key, node);
             return node;
+        }
+    }
+
+    static void addChild(Node parent, Node child) {
+        //     IsoContestBase.localEcho(parent.data + " has a new child : " + child.data);
+        parent.children.add(child);
+        computeHeight(parent);
+        child.setParent(parent);
+    }
+
+    static void computeHeight(Node node) {
+        // todo check for max between both ? YES
+        node.height = Math.max(node.height, 1 + IsoContest.getMaxHeight(node.children));
+        //    IsoContestBase.localEcho(node.data + " new height : " + node.height);
+        if (node.parent != null) {
+            computeHeight(node.parent);
         }
     }
 
@@ -80,21 +95,6 @@ class Node {
 
     public Node(String data) {
         this.data = data;
-    }
-
-    public void addChild(Node child) {
-        System.out.println(this.data + " has a new child : " + child.data);
-        this.children.add(child);
-        computeHeight();
-        child.setParent(this);
-    }
-
-    void computeHeight() {
-        this.height = 1 + IsoContest.getMaxHeight(this.children);
-        System.out.println(this.data + " new height : " + this.height);
-        if (this.parent != null) {
-            this.parent.computeHeight();
-        }
     }
 
     public String getData() {

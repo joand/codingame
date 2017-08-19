@@ -23,25 +23,25 @@ public class AppTest {
         Node nodeA = getNodeOrStoreIt(keyA, allNodes);
         Node nodeB = getNodeOrStoreIt(keyB, allNodes);
 
-        nodeA.addChild(nodeB);
+        IsoContest.addChild(nodeA, nodeB);
         assertEquals(2, getMaxHeight(allNodes));
 
         String keyC = "C";
         Node nodeC = getNodeOrStoreIt(keyC, allNodes);
         Node nodeB_2 = getNodeOrStoreIt(keyB, allNodes);
-        nodeB_2.addChild(nodeC);
+        IsoContest.addChild(nodeB_2, nodeC);
         assertEquals(3, getMaxHeight(allNodes));
 
         String keyD = "D";
         Node nodeD = getNodeOrStoreIt(keyD, allNodes);
         Node nodeA_2 = getNodeOrStoreIt(keyA, allNodes);
-        nodeA_2.addChild(nodeD);
+        IsoContest.addChild(nodeA_2, nodeD);
         assertEquals(3, getMaxHeight(allNodes));
 
         String keyE = "E";
         Node nodeE = getNodeOrStoreIt(keyE, allNodes);
         Node nodeA_3 = getNodeOrStoreIt(keyA, allNodes);
-        nodeE.addChild(nodeA_3);
+        IsoContest.addChild(nodeE, nodeA_3);
         assertEquals(4, getMaxHeight(allNodes));
 
     }
