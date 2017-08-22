@@ -12,6 +12,7 @@
         <module>medium/StockExchangeLosses</module>
         <module>medium/PhoneNumbers</module>
         <module>simpleTree</module>
+        <module>pokerMDF</module>
     </modules>
     <build>
         <plugins>
