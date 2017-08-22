@@ -13,6 +13,7 @@
         <module>medium/PhoneNumbers</module>
         <module>simpleTree</module>
         <module>pokerMDF</module>
+        <module>nuageDeTag</module>
     </modules>
     <build>
         <plugins>
