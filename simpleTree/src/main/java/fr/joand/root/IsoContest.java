@@ -10,24 +10,23 @@ package fr.joand.root;
 import java.util.*;
 
 public class IsoContest {
-    static int nbOfRows;
 
     public static void main(String[] args) throws Exception {
 
         Scanner sc = new Scanner(System.in);
-        nbOfRows = Integer.valueOf(sc.nextLine());
+        int nbOfRows = Integer.valueOf(sc.nextLine());
 //        IsoContestBase.localEcho("***************************nbOfRows : " + nbOfRows);
         Map<String, Node> allNodes = new HashMap<>();
         for (int index = 0; index < nbOfRows; index++) {
             String line = sc.nextLine();
             String[] splitedLine = line.split(" ");
-            String keyA = splitedLine[0];
-            String keyB = splitedLine[1];
+            String keyParent = splitedLine[0];
+            String keyChild = splitedLine[1];
 
-            Node nodeA = getNodeOrStoreIt(keyA, allNodes);
-            Node nodeB = getNodeOrStoreIt(keyB, allNodes);
+            Node nodeParent = getNodeOrStoreIt(keyParent, allNodes);
+            Node nodeChild = getNodeOrStoreIt(keyChild, allNodes);
 
-            addChild(nodeA, nodeB);
+            nodeParent.addChild(nodeChild);
         }
 
         computeAllHeights(allNodes);
@@ -37,16 +36,18 @@ public class IsoContest {
     }
 
     protected static void computeAllHeights(Map<String, Node> allNodes) {
-        for (Node node : allNodes.values()) {
-            //*
-            if (node.isLeaf()) {
-                computeHeight(node);
+        for (int index = 0; index < allNodes.values().size(); index++) {
+            for (Node node : allNodes.values()) {
+                //*
+                if (node.isLeaf()) {
+                    node.computeHeight();
+                }
+                /*/
+                for (Node child : node.children) {
+                    node.height = Math.max(node.height, 1 + child.getHeight());
+                }
+                //*/
             }
-            /*/
-            for (Node child : node.children) {
-                node.height = Math.max(node.height, 1 + child.getHeight());
-            }
-            //*/
         }
     }
 
@@ -64,10 +65,7 @@ public class IsoContest {
 
         int maxHeight = 0;
         for (Node node : nodes.values()) {
-            //maxHeight = Math.max(node.getHeight(), maxHeight);
-            if (node.isRoot()) {
-                return node.getHeight();
-            }
+            maxHeight = Math.max(node.getHeight(), maxHeight);
         }
         //     IsoContestBase.localEcho("FINAL ANSWER maxHeight : " + maxHeight);
         return maxHeight;
@@ -86,34 +84,17 @@ public class IsoContest {
         }
     }
 
-    static void addChild(Node parent, Node child) {
-        //     IsoContestBase.localEcho(parent.data + " has a new child : " + child.data);
-        parent.children.add(child);
-        //computeHeight(parent);
-        child.setParent(parent);
-    }
-
-    static void computeHeight(Node node) {
-        node.height = Math.max(node.height, 1 + IsoContest.getMaxHeight(node.children));
-        //    IsoContestBase.localEcho(node.data + " new height : " + node.height);
-        //*
-        if (node.parent != null) {
-            computeHeight(node.parent);
-        }
-        //*/
-    }
-
 }
 
 class Node {
-    final String data;
-    Node parent = null;
-    List<Node> children = new ArrayList<>();
+    private final String data;
+    private Node parent = null;
+    private List<Node> children = new ArrayList<>();
 
     /**
      * https://stackoverflow.com/questions/2603692/what-is-the-difference-between-tree-depth-and-height
      */
-    int height = 1;
+    private int height = 1;
 
     public Node(String data) {
         this.data = data;
@@ -127,12 +108,10 @@ class Node {
         return children.isEmpty();
     }
 
-    //*
     public boolean isRoot() {
         return parent == null;
     }
 
-    //*/
     public int getHeight() {
         return height;
     }
@@ -159,5 +138,20 @@ class Node {
     public int hashCode() {
         return Objects.hash(data);
     }
+
+    void addChild(Node child) {
+        //     IsoContestBase.localEcho(parent.data + " has a new child : " + child.data);
+        this.children.add(child);
+        child.setParent(this);
+    }
+
+    void computeHeight() {
+        this.height = Math.max(this.height, 1 + IsoContest.getMaxHeight(this.children));
+        //    IsoContestBase.localEcho(node.data + " new height : " + node.height);
+        if (this.parent != null) {
+            parent.computeHeight();
+        }
+    }
+
 }
 

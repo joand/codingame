@@ -23,13 +23,13 @@ public class AppTest {
         Node nodeA = getNodeOrStoreIt(keyA, allNodes);
         Node nodeB = getNodeOrStoreIt(keyB, allNodes);
 
-        IsoContest.addChild(nodeA, nodeB);
+        nodeA.addChild(nodeB);
         IsoContest.computeAllHeights(allNodes);
         assertEquals(2, getMaxHeight(allNodes));
 
         String keyC = "C";
         Node nodeC = getNodeOrStoreIt(keyC, allNodes);
-        IsoContest.addChild(nodeB, nodeC);
+        nodeB.addChild(nodeC);
         IsoContest.computeAllHeights(allNodes);
         assertEquals(3, getMaxHeight(allNodes));
     }
@@ -43,14 +43,14 @@ public class AppTest {
         String keyD = "D";
         Node nodeD = getNodeOrStoreIt(keyD, allNodes);
 
-        IsoContest.addChild(nodeA, nodeD);
+        nodeA.addChild(nodeD);
         IsoContest.computeAllHeights(allNodes);
         assertEquals(2, getMaxHeight(allNodes));
 
         String keyE = "E";
         Node nodeE = getNodeOrStoreIt(keyE, allNodes);
 
-        IsoContest.addChild(nodeA,nodeE);
+        nodeA.addChild(nodeE);
         IsoContest.computeAllHeights(allNodes);
         assertEquals(2, getMaxHeight(allNodes));
     }
@@ -66,13 +66,13 @@ public class AppTest {
         Node nodeA = getNodeOrStoreIt(keyA, allNodes);
         Node nodeB = getNodeOrStoreIt(keyB, allNodes);
 
-        IsoContest.addChild(nodeA, nodeB);
+        nodeA.addChild(nodeB);
         IsoContest.computeAllHeights(allNodes);
         assertEquals(2, getMaxHeight(allNodes));
 
         String keyC = "C";
         Node nodeC = getNodeOrStoreIt(keyC, allNodes);
-        IsoContest.addChild(nodeB, nodeC);
+        nodeB.addChild(nodeC);
         IsoContest.computeAllHeights(allNodes);
         assertEquals(3, getMaxHeight(allNodes));
 
@@ -80,7 +80,7 @@ public class AppTest {
         String keyD = "D";
         Node nodeD = getNodeOrStoreIt(keyD, allNodes);
 
-        IsoContest.addChild(nodeA, nodeD);
+        nodeA.addChild(nodeD);
         IsoContest.computeAllHeights(allNodes);
         assertEquals(3, getMaxHeight(allNodes));
     }
