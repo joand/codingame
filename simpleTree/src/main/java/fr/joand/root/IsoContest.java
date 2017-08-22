@@ -10,11 +10,12 @@ package fr.joand.root;
 import java.util.*;
 
 public class IsoContest {
+    static int nbOfRows;
 
     public static void main(String[] args) throws Exception {
 
         Scanner sc = new Scanner(System.in);
-        int nbOfRows = Integer.valueOf(sc.nextLine());
+        nbOfRows = Integer.valueOf(sc.nextLine());
 //        IsoContestBase.localEcho("***************************nbOfRows : " + nbOfRows);
         Map<String, Node> allNodes = new HashMap<>();
         for (int index = 0; index < nbOfRows; index++) {
@@ -29,8 +30,24 @@ public class IsoContest {
             addChild(nodeA, nodeB);
         }
 
+        computeAllHeights(allNodes);
+
         System.out.println(getMaxHeight(allNodes));
         allNodes.clear();
+    }
+
+    protected static void computeAllHeights(Map<String, Node> allNodes) {
+        for (Node node : allNodes.values()) {
+            //*
+            if (node.isLeaf()) {
+                computeHeight(node);
+            }
+            /*/
+            for (Node child : node.children) {
+                node.height = Math.max(node.height, 1 + child.getHeight());
+            }
+            //*/
+        }
     }
 
     static int getMaxHeight(List<Node> nodes) {
@@ -43,10 +60,14 @@ public class IsoContest {
     }
 
     static int getMaxHeight(Map<String, Node> nodes) {
+        //computeAllHeights(nodes);
+
         int maxHeight = 0;
         for (Node node : nodes.values()) {
-            maxHeight = node.getHeight() > maxHeight ?
-                    node.getHeight() : maxHeight;
+            //maxHeight = Math.max(node.getHeight(), maxHeight);
+            if (node.isRoot()) {
+                return node.getHeight();
+            }
         }
         //     IsoContestBase.localEcho("FINAL ANSWER maxHeight : " + maxHeight);
         return maxHeight;
@@ -68,17 +89,18 @@ public class IsoContest {
     static void addChild(Node parent, Node child) {
         //     IsoContestBase.localEcho(parent.data + " has a new child : " + child.data);
         parent.children.add(child);
-        computeHeight(parent);
+        //computeHeight(parent);
         child.setParent(parent);
     }
 
     static void computeHeight(Node node) {
-        // todo check for max between both ? YES
         node.height = Math.max(node.height, 1 + IsoContest.getMaxHeight(node.children));
         //    IsoContestBase.localEcho(node.data + " new height : " + node.height);
+        //*
         if (node.parent != null) {
             computeHeight(node.parent);
         }
+        //*/
     }
 
 }
@@ -97,10 +119,6 @@ class Node {
         this.data = data;
     }
 
-    public String getData() {
-        return data;
-    }
-
     public void setParent(Node parent) {
         this.parent = parent;
     }
@@ -109,10 +127,12 @@ class Node {
         return children.isEmpty();
     }
 
+    //*
     public boolean isRoot() {
         return parent == null;
     }
 
+    //*/
     public int getHeight() {
         return height;
     }
@@ -121,7 +141,7 @@ class Node {
     public String toString() {
         return "Node{" +
                 "data='" + data + '\'' +
-                ", parent=" + (parent != null ? parent.getData() : "null") +
+                //", parent=" + (parent != null ? parent.getData() : "null") +
                 ", nbOfChildren=" + children.size() +
                 ", height=" + height +
                 '}';

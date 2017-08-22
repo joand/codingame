@@ -14,7 +14,7 @@ import static junit.framework.Assert.assertEquals;
  */
 public class AppTest {
     @Test
-    public void testApp() {
+    public void line() {
         Map<String, Node> allNodes = new HashMap<>();
 
         String keyA = "A";
@@ -24,25 +24,64 @@ public class AppTest {
         Node nodeB = getNodeOrStoreIt(keyB, allNodes);
 
         IsoContest.addChild(nodeA, nodeB);
+        IsoContest.computeAllHeights(allNodes);
         assertEquals(2, getMaxHeight(allNodes));
 
         String keyC = "C";
         Node nodeC = getNodeOrStoreIt(keyC, allNodes);
-        Node nodeB_2 = getNodeOrStoreIt(keyB, allNodes);
-        IsoContest.addChild(nodeB_2, nodeC);
+        IsoContest.addChild(nodeB, nodeC);
+        IsoContest.computeAllHeights(allNodes);
         assertEquals(3, getMaxHeight(allNodes));
+    }
+
+    @Test
+    public void fork() {
+        Map<String, Node> allNodes = new HashMap<>();
+        String keyA = "A";
+        Node nodeA = getNodeOrStoreIt(keyA, allNodes);
 
         String keyD = "D";
         Node nodeD = getNodeOrStoreIt(keyD, allNodes);
-        Node nodeA_2 = getNodeOrStoreIt(keyA, allNodes);
-        IsoContest.addChild(nodeA_2, nodeD);
-        assertEquals(3, getMaxHeight(allNodes));
+
+        IsoContest.addChild(nodeA, nodeD);
+        IsoContest.computeAllHeights(allNodes);
+        assertEquals(2, getMaxHeight(allNodes));
 
         String keyE = "E";
         Node nodeE = getNodeOrStoreIt(keyE, allNodes);
-        Node nodeA_3 = getNodeOrStoreIt(keyA, allNodes);
-        IsoContest.addChild(nodeE, nodeA_3);
-        assertEquals(4, getMaxHeight(allNodes));
 
+        IsoContest.addChild(nodeA,nodeE);
+        IsoContest.computeAllHeights(allNodes);
+        assertEquals(2, getMaxHeight(allNodes));
+    }
+
+
+    @Test
+    public void mixed() {
+        Map<String, Node> allNodes = new HashMap<>();
+
+        String keyA = "A";
+        String keyB = "B";
+
+        Node nodeA = getNodeOrStoreIt(keyA, allNodes);
+        Node nodeB = getNodeOrStoreIt(keyB, allNodes);
+
+        IsoContest.addChild(nodeA, nodeB);
+        IsoContest.computeAllHeights(allNodes);
+        assertEquals(2, getMaxHeight(allNodes));
+
+        String keyC = "C";
+        Node nodeC = getNodeOrStoreIt(keyC, allNodes);
+        IsoContest.addChild(nodeB, nodeC);
+        IsoContest.computeAllHeights(allNodes);
+        assertEquals(3, getMaxHeight(allNodes));
+
+
+        String keyD = "D";
+        Node nodeD = getNodeOrStoreIt(keyD, allNodes);
+
+        IsoContest.addChild(nodeA, nodeD);
+        IsoContest.computeAllHeights(allNodes);
+        assertEquals(3, getMaxHeight(allNodes));
     }
 }
