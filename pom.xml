@@ -16,6 +16,7 @@
         <module>nuageDeTag</module>
         <module>salesforce</module>
         <module>trendingTopics</module>
+        <module>rallonge</module>
     </modules>
     <build>
         <plugins>
