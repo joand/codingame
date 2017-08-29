@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class MainTag {
     public static void main(String[] argv) throws Exception {
@@ -16,19 +17,24 @@ public class MainTag {
             String tagName = sc.nextLine();
             Tag tag = new Tag(tagName);
             if (allTags.contains(tag)) {
+                IsoContestBase.localEcho("existing tag : " + tag.getName() + " " + tag.getOccurence());
                 int index = allTags.indexOf(tag);
                 tag = allTags.get(index);
                 tag.increment();
+            } else {
+                IsoContestBase.localEcho("create tag : " + tag.getName());
+                allTags.add(tag);
             }
-            /* Lisez les données et effectuez votre traitement */
         }
-        final StringBuilder sb = new StringBuilder();
-        allTags.stream()
+
+        List<Tag> answers = allTags.stream()
                 .sorted((o1, o2) -> o2.getOccurence() - o1.getOccurence())
                 .limit(5)
-                .forEach(tag -> sb.append(tag.getName() + " " + tag.getOccurence()+"\n"));
-        System.out.println(sb.toString());
-    /* Vous pouvez aussi effectuer votre traitement une fois que vous avez lu toutes les données.*/
+                .collect(Collectors.toList());
+        for (Tag tag : answers) {
+            IsoContestBase.localEcho(tag.getName() + " " + tag.getOccurence());
+            System.out.println(tag.getName() + " " + tag.getOccurence());
+        }
     }
 }
 
