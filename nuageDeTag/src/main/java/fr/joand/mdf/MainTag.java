@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
-import java.util.stream.Collectors;
 
 public class MainTag {
     public static void main(String[] argv) throws Exception {
@@ -27,14 +26,10 @@ public class MainTag {
             }
         }
 
-        List<Tag> answers = allTags.stream()
+        allTags.stream()
                 .sorted((o1, o2) -> o2.getOccurence() - o1.getOccurence())
                 .limit(5)
-                .collect(Collectors.toList());
-        for (Tag tag : answers) {
-            IsoContestBase.localEcho(tag.getName() + " " + tag.getOccurence());
-            System.out.println(tag.getName() + " " + tag.getOccurence());
-        }
+                .forEach(tag -> System.out.println(tag.getName() + " " + tag.getOccurence()));
     }
 }
 
