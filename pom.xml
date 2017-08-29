@@ -15,6 +15,7 @@
         <module>pokerMDF</module>
         <module>nuageDeTag</module>
         <module>salesforce</module>
+        <module>trendingTopics</module>
     </modules>
     <build>
         <plugins>
