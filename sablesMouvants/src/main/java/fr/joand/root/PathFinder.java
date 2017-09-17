@@ -19,6 +19,24 @@ public class PathFinder {
     }
 
     // todo : to customize
+    public static PathFinder makePathFinder(List<String> edges, String debut, String fin, boolean isDirectedGraph) {
+        PathFinder pf = new PathFinder();
+        pf.isDirectedGraph = isDirectedGraph;
+
+        for (String edge : edges) {
+            String[] data = edge.split(" ");
+
+            String start = data[0];
+            String end = data[1];
+            int length = Integer.parseInt(data[2]);
+
+            pf.addEdge(start, end, length);
+        }
+        pf.findPath(debut, fin);
+        return pf;
+    }
+
+    // todo : to customize
     public static PathFinder makePathFinder(String graph, String debut, String fin, boolean isDirectedGraph) {
         PathFinder pf = new PathFinder();
         pf.isDirectedGraph = isDirectedGraph;

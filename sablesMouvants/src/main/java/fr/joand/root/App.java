@@ -1,77 +1,262 @@
 package fr.joand.root;
 
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-/**
- * utiliser, au choix :
- * Dijkstra
- * For a given source vertex (node) in the graph, the algorithm finds the path with lowest cost (i.e. the shortest path) between that vertex and every other vertex.   It can also be used for finding costs of shortest paths from a single vertex to a single destination vertex by stopping the algorithm once the shortest path to the destination vertex has been determined.
- * https://rosettacode.org/wiki/Dijkstra%27s_algorithm#Java
- * http://blog.cleancoder.com/uncle-bob/2016/10/26/DijkstrasAlg.html
- * https://github.com/mburst/dijkstras-algorithm/blob/master/Dijkstras.java
- * <p>
- * Floyd–Warshall (https://cs.stackexchange.com/questions/26344/floyd-warshall-algorithm-on-undirected-graph)
- * http://algs4.cs.princeton.edu/44sp/FloydWarshall.java.html
- */
 public class App {
     public static void main(String[] argv) throws Exception {
 
-        Scanner sc = new Scanner(System.in);
+        Scanner scanner = new Scanner(System.in);
 
-        String[] dimension = sc.nextLine().split(" ");
-        int hauteurTotale = Integer.parseInt(dimension[0]);
-        int largeurTotale = Integer.parseInt(dimension[1]);
+        String[] dimensions = scanner.nextLine().split(" ");
+        final int hauteurTotale = Integer.parseInt(dimensions[0]);
+        final int largeurTotale = Integer.parseInt(dimensions[1]);
 
-        final char terre = '.';
-        final char sable = '#';
+        final char TERRE = '.';
+        final char SABLE = '#';
 
         char[][] desert = new char[hauteurTotale][largeurTotale];
+        String[][] names = new String[hauteurTotale][largeurTotale];
+        int heatMap[][] = new int[hauteurTotale][largeurTotale];
 
+        // init maps
+        Integer nomDesCases = 0;
         for (int hauteur = 0; hauteur < hauteurTotale; hauteur++) {
-
-            String line = sc.nextLine();
-            desert[hauteur] = line.toCharArray();
-            /* Lisez les données et effectuez votre traitement */
+            String line = scanner.nextLine();
+            for (int largeur = 0; largeur < largeurTotale; largeur++) {
+                desert[hauteur][largeur] = line.charAt(largeur);
+                names[hauteur][largeur] = nomDesCases.toString();
+                nomDesCases++;
+            }
         }
-    /* Vous pouvez aussi effectuer votre traitement une fois que vous avez lu toutes les données.*/
+
+        // init edges/graph
+        List<String> edges = new ArrayList<>();
+        for (int hauteur = 0; hauteur < hauteurTotale; hauteur++) {
+            for (int largeur = 0; largeur < largeurTotale; largeur++) {
+                String start = names[hauteur][largeur];
+
+                // format : "start end distance"
+                if (hauteur + 1 < hauteurTotale) {
+                    String edgeA = start + " " + names[hauteur + 1][largeur] + " " + 1;
+                    edges.add(edgeA);
+                }
+
+                if (hauteur - 1 > 0) {
+                    String edgeB = start + " " + names[hauteur - 1][largeur] + " " + 1;
+                    edges.add(edgeB);
+                }
+
+                if (largeur + 1 < largeurTotale) {
+                    String edgeC = start + " " + names[hauteur][largeur + 1] + " " + 1;
+                    edges.add(edgeC);
+                }
+
+                if (largeur - 1 > 0) {
+                    String edgeD = start + " " + names[hauteur][largeur - 1] + " " + 1;
+                    edges.add(edgeD);
+                }
+            }
+        }
+
+        // do the job
+
+        for (int hauteurSable = 0; hauteurSable < hauteurTotale; hauteurSable++) {
+            for (int largeurSable = 0; largeurSable < largeurTotale; largeurSable++) {
+                heatMap[hauteurSable][largeurSable] = 0;
+
+                if (desert[hauteurSable][largeurSable] == SABLE) { // pour chaque carré de sable
+                    String debut = names[hauteurSable][largeurSable];
+                    int profondeurMax = 0;
+                    for (int hauteurTerre = 0; hauteurTerre < hauteurTotale; hauteurTerre++) {
+                        for (int largeurTerre = 0; largeurTerre < largeurTotale; largeurTerre++) {
+                            if (desert[hauteurTerre][largeurTerre] == TERRE) { // si c'est de la terre
+                                String fin = names[hauteurTerre][largeurTerre];
+                                boolean isDirectedGraph = false;
+                                PathFinder pf = PathFinder.makePathFinder(edges, debut, fin, isDirectedGraph);
+                                int profondeur = pf.getLength();
+                                profondeurMax = Math.max(profondeur, profondeurMax);
+                            }
+                        }
+                    }
+                    heatMap[hauteurSable][largeurSable] = profondeurMax;
+                }
+            }
+        }
+
+        // find the max
+        int answer = 0;
+        for (int hauteur = 0; hauteur < hauteurTotale; hauteur++) {
+            for (int largeur = 0; largeur < largeurTotale; largeur++) {
+                answer = Math.max(answer, heatMap[hauteur][largeur]);
+            }
+        }
+
+        System.out.println(answer);
+
     }
 
-    List<Edge> convert(char[][] map) {
-        // todo
-        return null;
-    }
 }
 
-class Edge {
-    final String from;
-    final String to;
+class PathFinder_ {
+    private List<Edge> edges = new ArrayList<>();
+    private Set<String> nodeNames = new HashSet<>();
+    private Map<String, Node> nodes = new HashMap<>();
+    private Node endNode;
+    private boolean isDirectedGraph;
 
-    final String length;
-
-    public Edge(String from, String to, String length) {
-        this.from = from;
-        this.to = to;
-        this.length = length;
+    private PathFinder_() {
     }
 
-    public String getFrom() {
-        return from;
+    // todo : to customize
+    public static PathFinder_ makePathFinder(List<String> edges, String debut, String fin, boolean isDirectedGraph) {
+        PathFinder_ pf = new PathFinder_();
+        pf.isDirectedGraph = isDirectedGraph;
+
+        for (String edge : edges) {
+            String[] data = edge.split(" ");
+
+            String start = data[0];
+            String end = data[1];
+            int length = Integer.parseInt(data[2]);
+
+            pf.addEdge(start, end, length);
+        }
+        pf.findPath(debut, fin);
+        return pf;
     }
 
-    public String getTo() {
-        return to;
+    // todo : to customize
+    public static PathFinder_ makePathFinder(String graph, String debut, String fin, boolean isDirectedGraph) {
+        PathFinder_ pf = new PathFinder_();
+        pf.isDirectedGraph = isDirectedGraph;
+        Pattern edgePattern =
+                Pattern.compile("(\\D+)(\\d+)(\\D+)");
+        String[] edges = graph.split(",");
+        for (String edge : edges) {
+            Matcher matcher = edgePattern.matcher(edge);
+            if (matcher.matches()) {
+                String start = matcher.group(1);
+                int length = Integer.parseInt(matcher.group(2));
+                String end = matcher.group(3);
+                pf.addEdge(start, end, length);
+            }
+        }
+        pf.findPath(debut, fin);
+        return pf;
     }
 
-    public String getLength() {
-        return length;
+    public void findPath(String begin, String end) {
+        List<String> unvisited = initializeSearch(begin, end);
+
+        for (String node = begin;
+             node != null && !node.equals(end);
+             node = getNext(unvisited)) {
+            unvisited.remove(node);
+            visit(node);
+        }
+
+        setupEndNode(end);
     }
 
-    public int getIntLength() {
-        return Integer.parseInt(length);
+    private List<String> initializeSearch(String begin,
+                                          String end) {
+        nodeNames.add(begin);
+        nodeNames.add(end);
+        List<String> unvisited = new ArrayList<>(nodeNames);
+        for (String node : unvisited) {
+            nodes.put(node, new Node(Integer.MAX_VALUE));
+        }
+        nodes.get(begin).length = 0;
+        return unvisited;
     }
 
-    public float getFloatLength() {
-        return Float.parseFloat(length);
+    private void visit(String node) {
+        List<Edge> neighbors = findEdges(node);
+        Node curNode = nodes.get(node);
+        for (Edge e : neighbors) {
+            Node nbr = nodes.get(e.end);
+
+            int newLength = curNode.length + e.length;
+            if (nbr.length > newLength) {
+                nbr.length = newLength;
+                nbr.path = new ArrayList<>();
+                nbr.path.addAll(curNode.path);
+                nbr.path.add(node);
+            }
+        }
+    }
+
+    private void setupEndNode(String end) {
+        endNode = nodes.get(end);
+        if (endNode.length != Integer.MAX_VALUE) {
+            endNode.path.add(end);
+        } else {
+            endNode.length = 0;
+        }
+    }
+
+    private String getNext(List<String> unvisited) {
+        String minNodeName = null;
+        int minLength = Integer.MAX_VALUE;
+
+        for (String name : unvisited) {
+            Node candidate = nodes.get(name);
+            if (candidate.length < minLength) {
+                minLength = candidate.length;
+                minNodeName = name;
+            }
+        }
+        return minNodeName;
+    }
+
+    private List<Edge> findEdges(String begin) {
+        List<Edge> found = new ArrayList<>();
+        for (Edge e : edges) {
+            if (e.begin.equals(begin)) {
+                found.add(e);
+            }
+        }
+        return found;
+    }
+
+    public int getLength() {
+        return endNode.length;
+    }
+
+    public List<String> getPath() {
+        return endNode.path;
+    }
+
+    public void addEdge(String start, String end, int length) {
+        edges.add(new Edge(start, end, length));
+        if (!isDirectedGraph) {
+            edges.add(new Edge(end, start, length));
+        }
+        nodeNames.add(start);
+        nodeNames.add(end);
+    }
+
+    private static class Edge {
+        public final String begin;
+        public final String end;
+        public final int length;
+
+        public Edge(String begin, String end, int length) {
+            this.begin = begin;
+            this.end = end;
+            this.length = length;
+        }
+    }
+
+    private static class Node {
+        public int length;
+        public List<String> path;
+
+        public Node(int l) {
+            this.length = l;
+            this.path = new ArrayList<>();
+        }
     }
 }
