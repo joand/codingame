@@ -17,6 +17,7 @@
         <module>salesforce</module>
         <module>trendingTopics</module>
         <module>rallonge</module>
+        <module>sablesMouvants</module>
     </modules>
     <build>
         <plugins>
