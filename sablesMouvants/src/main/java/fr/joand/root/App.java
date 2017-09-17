@@ -68,19 +68,19 @@ public class App {
 
                 if (desert[hauteurSable][largeurSable] == SABLE) { // pour chaque carré de sable
                     String debut = names[hauteurSable][largeurSable];
-                    int profondeurMax = 0;
+                    int deplacementMin = Integer.MAX_VALUE;
                     for (int hauteurTerre = 0; hauteurTerre < hauteurTotale; hauteurTerre++) {
                         for (int largeurTerre = 0; largeurTerre < largeurTotale; largeurTerre++) {
                             if (desert[hauteurTerre][largeurTerre] == TERRE) { // si c'est de la terre
                                 String fin = names[hauteurTerre][largeurTerre];
                                 boolean isDirectedGraph = false;
                                 PathFinder pf = PathFinder.makePathFinder(edges, debut, fin, isDirectedGraph);
-                                int profondeur = pf.getLength();
-                                profondeurMax = Math.max(profondeur, profondeurMax);
+                                int deplacement = pf.getLength();
+                                deplacementMin = Math.min(deplacement, deplacementMin);
                             }
                         }
                     }
-                    heatMap[hauteurSable][largeurSable] = profondeurMax;
+                    heatMap[hauteurSable][largeurSable] = deplacementMin;
                 }
             }
         }
