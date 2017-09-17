@@ -1,6 +1,8 @@
 package fr.joand.root;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Robert C. Martin
@@ -11,6 +13,30 @@ public class PathFinder {
     private Set<String> nodeNames = new HashSet<>();
     private Map<String, Node> nodes = new HashMap<>();
     private Node endNode;
+    private boolean isDirectedGraph;
+
+    private PathFinder() {
+    }
+
+    // todo : to customize
+    public static PathFinder makePathFinder(String graph, String debut, String fin, boolean isDirectedGraph) {
+        PathFinder pf = new PathFinder();
+        pf.isDirectedGraph = isDirectedGraph;
+        Pattern edgePattern =
+                Pattern.compile("(\\D+)(\\d+)(\\D+)");
+        String[] edges = graph.split(",");
+        for (String edge : edges) {
+            Matcher matcher = edgePattern.matcher(edge);
+            if (matcher.matches()) {
+                String start = matcher.group(1);
+                int length = Integer.parseInt(matcher.group(2));
+                String end = matcher.group(3);
+                pf.addEdge(start, end, length);
+            }
+        }
+        pf.findPath(debut, fin);
+        return pf;
+    }
 
     public void findPath(String begin, String end) {
         List<String> unvisited = initializeSearch(begin, end);
@@ -96,7 +122,9 @@ public class PathFinder {
 
     public void addEdge(String start, String end, int length) {
         edges.add(new Edge(start, end, length));
-        //edges.add(new Edge(end, start, length)); // todo ? add the reverse edge ?
+        if (!isDirectedGraph) {
+            edges.add(new Edge(end, start, length));
+        }
         nodeNames.add(start);
         nodeNames.add(end);
     }

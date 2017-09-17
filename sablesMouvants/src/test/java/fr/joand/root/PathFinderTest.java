@@ -2,9 +2,6 @@ package fr.joand.root;
 
 import org.junit.Test;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import static junit.framework.Assert.assertEquals;
 
 
@@ -14,11 +11,9 @@ import static junit.framework.Assert.assertEquals;
  */
 public class PathFinderTest {
 
-    private void assertMinPath(String actualGraph,
+    private void assertMinPath(String actualGraph, String debut, String fin, boolean isDirectedGraph,
                                int expectedLength, String expectedPath) {
-        String debut = "A";
-        String fin = "Z";
-        PathFinder pf = makePathFinder(actualGraph, debut, fin);
+        PathFinder pf = PathFinder.makePathFinder(actualGraph, debut, fin, isDirectedGraph);
 
         assertEquals(expectedLength, pf.getLength());
         if (expectedPath != null) {
@@ -26,23 +21,17 @@ public class PathFinderTest {
         }
     }
 
-    // todo : to customize
-    private PathFinder makePathFinder(String graph, String debut, String fin) {
-        PathFinder pf = new PathFinder();
-        Pattern edgePattern =
-                Pattern.compile("(\\D+)(\\d+)(\\D+)");
-        String[] edges = graph.split(",");
-        for (String edge : edges) {
-            Matcher matcher = edgePattern.matcher(edge);
-            if (matcher.matches()) {
-                String start = matcher.group(1);
-                int length = Integer.parseInt(matcher.group(2));
-                String end = matcher.group(3);
-                pf.addEdge(start, end, length);
-            }
+    private void assertMinPath(String actualGraph,
+                               int expectedLength, String expectedPath) {
+        String debut = "A";
+        String fin = "Z";
+        boolean isDirectedGraph = false;
+        PathFinder pf = PathFinder.makePathFinder(actualGraph, debut, fin, isDirectedGraph);
+
+        assertEquals(expectedLength, pf.getLength());
+        if (expectedPath != null) {
+            assertEquals(expectedPath, pf.getPath().toString());
         }
-        pf.findPath(debut, fin);
-        return pf;
     }
 
     @Test
