@@ -14,16 +14,20 @@ import static junit.framework.Assert.assertEquals;
  */
 public class PathFinderTest {
 
-    private void assertMinPath(String graph,
-                               Integer length, String path) {
-        PathFinder pf = makePathFinder(graph);
-        if (length != null)
-            assertEquals((int) length, pf.getLength());
-        if (path != null)
-            assertEquals(path, pf.getPath().toString());
+    private void assertMinPath(String actualGraph,
+                               int expectedLength, String expectedPath) {
+        String debut = "A";
+        String fin = "Z";
+        PathFinder pf = makePathFinder(actualGraph, debut, fin);
+
+        assertEquals(expectedLength, pf.getLength());
+        if (expectedPath != null) {
+            assertEquals(expectedPath, pf.getPath().toString());
+        }
     }
 
-    private PathFinder makePathFinder(String graph) {
+    // todo : to customize
+    private PathFinder makePathFinder(String graph, String debut, String fin) {
         PathFinder pf = new PathFinder();
         Pattern edgePattern =
                 Pattern.compile("(\\D+)(\\d+)(\\D+)");
@@ -37,7 +41,7 @@ public class PathFinderTest {
                 pf.addEdge(start, end, length);
             }
         }
-        pf.findPath("A", "Z");
+        pf.findPath(debut, fin);
         return pf;
     }
 
@@ -79,6 +83,18 @@ public class PathFinderTest {
     public void parallelPaths() throws Exception {
         assertMinPath("A1B,B2Z,A1Z", 1, "[A, Z]");
         assertMinPath("A1B,A1C,A2D,C5E,B8E,C1F,D3F,F2G,G3Z,E2G",
-                7,"[A, C, F, G, Z]");
+                7, "[A, C, F, G, Z]");
+    }
+
+    /**
+     * http://www.geeksforgeeks.org/greedy-algorithms-set-6-dijkstras-shortest-path-algorithm/
+     */
+    @Test
+    public void geeksforgeeks() {
+        String actualGraph = "A4B,A8H,B11H,B8C,H7I,H1G,C2I,I6G,C7D,C4F,G2F,D14F,F10Z,D9Z";
+        int expectedLength = 21;
+        String expectedPath = "[A, H, G, F, Z]";
+
+        assertMinPath(actualGraph, expectedLength, expectedPath);
     }
 }

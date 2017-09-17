@@ -96,6 +96,7 @@ public class PathFinder {
 
     public void addEdge(String start, String end, int length) {
         edges.add(new Edge(start, end, length));
+        //edges.add(new Edge(end, start, length)); // todo ? add the reverse edge ?
         nodeNames.add(start);
         nodeNames.add(end);
     }
