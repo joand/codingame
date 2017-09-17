@@ -86,4 +86,17 @@ public class PathFinderTest {
 
         assertMinPath(actualGraph, expectedLength, expectedPath);
     }
+
+    @Test
+    public void geeksforgeeksOrientedGraph() {
+        String actualGraph = "A4B,A8H,B11H,B8C,H7I,H1G,C2I,I6G,C7D,C4F,G2F,D14F,Z10F,Z9D";
+        int expectedLength = 0;
+        String expectedPath = "[]";
+
+        String debut = "A";
+        String fin = "Z";
+        boolean isDirectedGraph = true;
+        assertMinPath(actualGraph, debut, fin, isDirectedGraph,
+                expectedLength, expectedPath);
+    }
 }
