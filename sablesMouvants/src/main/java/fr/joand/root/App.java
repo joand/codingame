@@ -74,7 +74,7 @@ public class App {
                             if (desert[hauteurTerre][largeurTerre] == TERRE) { // si c'est de la terre
                                 String fin = names[hauteurTerre][largeurTerre];
                                 boolean isDirectedGraph = false;
-                                PathFinder pf = PathFinder.makePathFinder(edges, debut, fin, isDirectedGraph);
+                                PathFinder_ pf = PathFinder_.makePathFinder(edges, debut, fin, isDirectedGraph);
                                 int deplacement = pf.getLength();
                                 deplacementMin = Math.min(deplacement, deplacementMin);
                             }
