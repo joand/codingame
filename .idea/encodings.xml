@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/easy/ascii" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/easy/horseRacingDual" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/medium/PhoneNumbers" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/medium/StockExchangeLosses" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/nuageDeTag" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/pokerMDF" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/rallonge" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/sablesMouvants" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/salesforce" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/simpleTree" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/trendingTopics" charset="UTF-8" />
+  </component>
+</project>

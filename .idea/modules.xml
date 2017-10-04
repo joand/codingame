@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/medium/PhoneNumbers/PhoneNumbers.iml" filepath="$PROJECT_DIR$/medium/PhoneNumbers/PhoneNumbers.iml" />
+      <module fileurl="file://$PROJECT_DIR$/medium/StockExchangeLosses/StockExchangeLosses.iml" filepath="$PROJECT_DIR$/medium/StockExchangeLosses/StockExchangeLosses.iml" />
+      <module fileurl="file://$PROJECT_DIR$/easy/ascii/ascii.iml" filepath="$PROJECT_DIR$/easy/ascii/ascii.iml" />
+      <module fileurl="file://$PROJECT_DIR$/codingame.iml" filepath="$PROJECT_DIR$/codingame.iml" />
+      <module fileurl="file://$PROJECT_DIR$/easy/horseRacingDual/horse.racing.dual.iml" filepath="$PROJECT_DIR$/easy/horseRacingDual/horse.racing.dual.iml" />
+      <module fileurl="file://$PROJECT_DIR$/nuageDeTag/nuageDeTag.iml" filepath="$PROJECT_DIR$/nuageDeTag/nuageDeTag.iml" />
+      <module fileurl="file://$PROJECT_DIR$/pokerMDF/poker.iml" filepath="$PROJECT_DIR$/pokerMDF/poker.iml" />
+      <module fileurl="file://$PROJECT_DIR$/rallonge/rallonge.iml" filepath="$PROJECT_DIR$/rallonge/rallonge.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sablesMouvants/sablesMouvants.iml" filepath="$PROJECT_DIR$/sablesMouvants/sablesMouvants.iml" />
+      <module fileurl="file://$PROJECT_DIR$/salesforce/salesforce.iml" filepath="$PROJECT_DIR$/salesforce/salesforce.iml" />
+      <module fileurl="file://$PROJECT_DIR$/simpleTree/simpleTree.iml" filepath="$PROJECT_DIR$/simpleTree/simpleTree.iml" />
+      <module fileurl="file://$PROJECT_DIR$/trendingTopics/trendingTopics.iml" filepath="$PROJECT_DIR$/trendingTopics/trendingTopics.iml" />
+    </modules>
+  </component>
+</project>
