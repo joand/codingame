@@ -1,3 +1,4 @@
+
 # Contributing
 
 Thanks for considering contributing to Codingame!
@@ -39,3 +40,9 @@ We love pull requests. Here’s a quick guide:
 ## Adding new features
 
 Thinking of adding a new feature? Cool! [Open an issue](https://github.com/joand/codingame/issues) and let’s design it together.
+
+## Contribution
+ * Contributions are always welcome.
+ * PRs are welcome. To contribute, follow the structure:
+ >  [codingame-language]->[difficulty/name_of_exercise/name_of_file]
+

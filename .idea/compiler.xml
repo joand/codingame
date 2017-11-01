@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <resourceExtensions />
+    <annotationProcessing>
+      <profile default="true" name="Default" enabled="false">
+        <processorPath useClasspath="true" />
+      </profile>
+      <profile default="false" name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="ascii" />
+        <module name="horse.racing.dual" />
+        <module name="nuageDeTag" />
+        <module name="PhoneNumbers" />
+        <module name="poker" />
+        <module name="rallonge" />
+        <module name="sablesMouvants" />
+        <module name="salesforce" />
+        <module name="simpleTree" />
+        <module name="StockExchangeLosses" />
+        <module name="trendingTopics" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="ascii" target="1.8" />
+      <module name="codingame" target="1.8" />
+      <module name="horse.racing.dual" target="1.8" />
+      <module name="nuageDeTag" target="1.8" />
+      <module name="PhoneNumbers" target="1.8" />
+      <module name="poker" target="1.8" />
+      <module name="rallonge" target="1.8" />
+      <module name="sablesMouvants" target="1.8" />
+      <module name="salesforce" target="1.8" />
+      <module name="simpleTree" target="1.8" />
+      <module name="StockExchangeLosses" target="1.8" />
+      <module name="trendingTopics" target="1.8" />
+    </bytecodeTargetLevel>
+  </component>
+</project>
